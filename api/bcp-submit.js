@@ -1,6 +1,21 @@
 const { Resend } = require('resend');
 const Anthropic = require('@anthropic-ai/sdk');
 
+// Googleスプレッドシートに診断データを記録
+async function saveToSheet(data) {
+  const webhookUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
+  if (!webhookUrl) return;
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  } catch (err) {
+    console.error('スプレッドシート記録エラー:', err);
+  }
+}
+
 const CATEGORIES = [
   'BCPの策定状況',
   'リスク認識・評価',
@@ -300,7 +315,6 @@ module.exports = async (req, res) => {
     await resend.emails.send({
       from: 'レジリエンスラボ BCP診断 <report-noreply@resilab-jpn.com>',
       to: email,
-      bcc: process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com', // 社内控えとして同じレポートを保存
       subject: `【BCP診断レポート】${company}様 — 総合スコア${totalScore}点（${level}）`,
       html,
     });
@@ -321,6 +335,9 @@ module.exports = async (req, res) => {
     console.error('通知メール送信エラー:', err);
     errors.push('notify_mail_failed');
   }
+
+  // Googleスプレッドシートにデータを記録
+  await saveToSheet({ company, dept, name, email, tel, size, totalScore, level, catPcts, submittedAt });
 
   // メール失敗時もデータをログに残す
   if (errors.length > 0) {

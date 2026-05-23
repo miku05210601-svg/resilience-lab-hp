@@ -310,9 +310,12 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, 
         ${lossScenarios ? `
         <div style="margin-bottom:32px;">
           <h2 style="font-size:16px; color:#C8002D; border-bottom:2px solid #C8002D; padding-bottom:8px; margin:0 0 8px;">■ BCP未整備の場合のリスクシナリオ別 損失試算</h2>
-          <p style="font-size:12px; color:#999; margin:0 0 16px;">
-            ※推計年商 約${revenueInfo.value >= 10000 ? (revenueInfo.value/10000).toFixed(1)+'億円' : revenueInfo.value+'百万円'}（${revenueInfo.isInput ? 'ご入力値' : '従業員数・業種からの推計値'}）をもとに算出した参考値です。保険数理的アプローチによる推計であり、実際の損失額を保証するものではありません。
-          </p>
+          <div style="background:#fffbe6; border:1px solid #f59e0b; border-radius:8px; padding:12px 16px; margin-bottom:16px;">
+            <p style="font-size:12px; color:#92400e; margin:0; line-height:1.8;">
+              ⚠️ <strong>注意：この試算はあくまで参考値です</strong><br>
+              推計年商（約${revenueInfo.value >= 10000 ? (revenueInfo.value/10000).toFixed(1)+'億円' : revenueInfo.value+'百万円'}／${revenueInfo.isInput ? 'ご入力値' : '従業員数・業種からの推計値'}）をもとに、保険数理的アプローチで算出した概算です。実際の損失額は、拠点数・事業構成・既存の対策状況・被災規模などにより大きく異なります。本数値は「何も対策しなかった場合のリスクの大きさ感」を把握する目的でご参照ください。投資判断・保険設計等の根拠としてそのままご使用にならないようご注意ください。
+            </p>
+          </div>
           ${lossScenarios.map(s => `
           <div style="border:1px solid #eee; border-radius:10px; padding:16px; margin-bottom:12px; background:#fafafa;">
             <p style="font-size:15px; font-weight:bold; color:#1a1a2e; margin:0 0 10px;">${s.icon} ${s.name}</p>

@@ -300,6 +300,7 @@ module.exports = async (req, res) => {
     await resend.emails.send({
       from: 'レジリエンスラボ BCP診断 <report-noreply@resilab-jpn.com>',
       to: email,
+      bcc: process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com', // 社内控えとして同じレポートを保存
       subject: `【BCP診断レポート】${company}様 — 総合スコア${totalScore}点（${level}）`,
       html,
     });

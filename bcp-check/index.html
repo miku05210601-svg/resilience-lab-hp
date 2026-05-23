@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BCP簡易診断ツール｜株式会社レジリエンスラボ</title>
+
+  <meta name="description" content="企業のBCP（事業継続計画）水準を無料で診断。約5分で自社のBCP課題を把握できます。">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #C8002D;
+      --red-dark: #9e0024;
+      --red-light: #fff0f2;
+      --gray-900: #1a1a1a;
+      --gray-700: #444;
+      --gray-500: #777;
+      --gray-200: #e8e8e8;
+      --gray-100: #f5f5f5;
+      --white: #fff;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Meiryo', sans-serif;
+      color: var(--gray-900);
+      background: var(--gray-100);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    /* ヘッダー */
+    header {
+      background: var(--white);
+      border-bottom: 3px solid var(--red);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: 0.05em;
+      text-decoration: none;
+    }
+    .logo span { color: var(--gray-700); font-weight: 400; }
+    .header-title {
+      font-size: 13px;
+      color: var(--gray-500);
+      border-left: 2px solid var(--gray-200);
+      padding-left: 16px;
+    }
+
+    /* メインコンテンツ */
+    main { max-width: 800px; margin: 0 auto; padding: 40px 16px 80px; }
+
+    /* カード共通 */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 48px 40px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 480px) {
+      .card { padding: 32px 20px; }
+    }
+
+    /* セクション表示制御 */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ===== イントロ ===== */
+    .intro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--red-light);
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+    .intro-badge::before { content: '●'; font-size: 8px; }
+    .intro-title {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 900;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      color: var(--gray-900);
+    }
+    .intro-title em { color: var(--red); font-style: normal; }
+    .intro-desc {
+      font-size: 15px;
+      color: var(--gray-700);
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+    .intro-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--gray-700);
+      background: var(--gray-100);
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    .meta-item .icon { font-size: 18px; }
+    .domains {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    @media (max-width: 480px) { .domains { grid-template-columns: repeat(2, 1fr); } }
+    .domain-chip {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      text-align: center;
+      color: var(--gray-700);
+    }
+    .domain-chip .num {
+      display: block;
+      font-size: 11px;
+      color: var(--red);
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    /* ===== ボタン ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 40px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--red);
+      color: var(--white);
+      width: 100%;
+    }
+    .btn-primary:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,0,45,0.3); }
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--gray-700);
+      border: 1px solid var(--gray-200);
+      font-size: 14px;
+      padding: 12px 24px;
+    }
+    .btn-secondary:hover { background: var(--gray-200); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ===== 診断フォーム ===== */
+    .progress-wrap {
+      margin-bottom: 32px;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .progress-label { font-size: 13px; color: var(--gray-500); }
+    .progress-count { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+    .progress-bar-bg {
+      background: var(--gray-200);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: var(--red);
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .q-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--red-light);
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    .q-text {
+      font-size: clamp(16px, 3vw, 20px);
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 28px;
+      color: var(--gray-900);
+    }
+
+    .choices { display: flex; flex-direction: column; gap: 10px; margin-bottom: 36px; }
+    .choice-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 18px;
+      border: 2px solid var(--gray-200);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .choice-label:hover { border-color: var(--red); background: var(--red-light); }
+    .choice-label input[type="radio"] { display: none; }
+    .choice-label.selected {
+      border-color: var(--red);
+      background: var(--red-light);
+      font-weight: 700;
+    }
+    .choice-radio {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-200);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .choice-label.selected .choice-radio {
+      border-color: var(--red);
+      background: var(--red);
+    }
+    .choice-label.selected .choice-radio::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .quiz-nav {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .quiz-nav .btn-secondary { min-width: 100px; }
+    .quiz-nav .btn-primary { flex: 1; }
+
+    /* ===== 結果 ===== */
+    .result-header { text-align: center; margin-bottom: 40px; }
+    .result-score-wrap {
+      display: inline-block;
+      position: relative;
+    }
+    .result-score {
+      font-size: clamp(48px, 10vw, 72px);
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1;
+    }
+    .result-score-label { font-size: 14px; color: var(--gray-500); margin-top: 4px; }
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 28px;
+      border-radius: 999px;
+      font-size: 20px;
+      font-weight: 900;
+      margin: 20px 0 12px;
+    }
+    .level-A { background: #e8f5e9; color: #2e7d32; }
+    .level-B { background: #e3f2fd; color: #1565c0; }
+    .level-C { background: #fff8e1; color: #f57f17; }
+    .level-D { background: #fce4ec; color: var(--red-dark); }
+    .level-desc { font-size: 15px; color: var(--gray-700); max-width: 480px; margin: 0 auto 32px; }
+
+    .chart-wrap {
+      max-width: 480px;
+      margin: 0 auto 40px;
+      position: relative;
+    }
+
+    .domain-scores {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    @media (max-width: 480px) { .domain-scores { grid-template-columns: 1fr; } }
+    .domain-score-item {
+      background: var(--gray-100);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .domain-score-name { font-size: 13px; color: var(--gray-500); margin-bottom: 6px; }
+    .domain-score-bar-bg {
+      background: var(--gray-200);
+      border-radius: 999px;
+      height: 8px;
+      margin-bottom: 4px;
+      overflow: hidden;
+    }
+    .domain-score-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--red);
+      transition: width 1s ease;
+    }
+    .domain-score-val { font-size: 12px; color: var(--gray-700); text-align: right; }
+
+    .result-cta {
+      background: linear-gradient(135deg, #1a1a2e, #2d1a3e);
+      color: white;
+      border-radius: var(--radius);
+      padding: 32px;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .result-cta h3 { font-size: 18px; margin-bottom: 8px; }
+    .result-cta p { font-size: 14px; opacity: 0.8; margin-bottom: 20px; }
+    .btn-cta {
+      background: var(--red);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .btn-cta:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+    /* ===== お客様情報フォーム ===== */
+    .form-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
+    .form-desc { font-size: 14px; color: var(--gray-500); margin-bottom: 32px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--gray-700);
+    }
+    .form-label .required {
+      color: var(--red);
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .form-input:focus { outline: none; border-color: var(--red); }
+    .form-input.error { border-color: #e53e3e; }
+    .form-error { font-size: 12px; color: #e53e3e; margin-top: 4px; display: none; }
+    .privacy-note {
+      font-size: 12px;
+      color: var(--gray-500);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    /* ===== サンキュー ===== */
+    .thankyou-icon { font-size: 64px; text-align: center; margin-bottom: 16px; }
+    .thankyou-title { font-size: 26px; font-weight: 900; text-align: center; margin-bottom: 12px; }
+    .thankyou-desc { font-size: 15px; color: var(--gray-700); text-align: center; line-height: 1.8; margin-bottom: 32px; }
+    .thankyou-box {
+      background: var(--gray-100);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      font-size: 14px;
+      color: var(--gray-700);
+    }
+    .thankyou-box ul { padding-left: 20px; }
+    .thankyou-box li { margin-bottom: 6px; }
+
+    /* ローディング */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--gray-200);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="https://resilab-jpn.com/" class="logo" target="_blank">
+      レジリエンスラボ
+    </a>
+    <div class="header-title">BCP簡易診断ツール</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===== イントロ ===== -->
+  <section id="section-intro" class="section active">
+    <div class="card">
+      <div class="intro-badge">無料・約5分</div>
+      <h1 class="intro-title">
+        あなたの会社の<br>
+        <em>BCP対策</em>は大丈夫ですか？
+      </h1>
+      <p class="intro-desc">
+        大規模災害・システム障害・感染症など、事業を脅かすリスクは多様化しています。<br>
+        20の設問に答えるだけで、自社のBCP（事業継続計画）の現状と課題を把握できます。
+      </p>
+      <div class="intro-meta">
+        <div class="meta-item"><span class="icon">📋</span> 全20問</div>
+        <div class="meta-item"><span class="icon">⏱</span> 約5分</div>
+        <div class="meta-item"><span class="icon">🏢</span> 経営者・BCP担当者向け</div>
+        <div class="meta-item"><span class="icon">💴</span> 無料</div>
+      </div>
+      <p style="font-size:14px; font-weight:700; color:var(--gray-700); margin-bottom:12px;">診断領域（6カテゴリ）</p>
+      <div class="domains">
+        <div class="domain-chip"><span class="num">領域①</span>BCPの策定状況</div>
+        <div class="domain-chip"><span class="num">領域②</span>リスク認識・評価</div>
+        <div class="domain-chip"><span class="num">領域③</span>組織・体制</div>
+        <div class="domain-chip"><span class="num">領域④</span>IT・情報管理</div>
+        <div class="domain-chip"><span class="num">領域⑤</span>サプライチェーン</div>
+        <div class="domain-chip"><span class="num">領域⑥</span>訓練・維持管理</div>
+      </div>
+      <button class="btn btn-primary" onclick="startQuiz()">
+        診断をはじめる →
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== 診断 ===== -->
+  <section id="section-quiz" class="section">
+    <div class="card">
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span class="progress-label" id="progress-category"></span>
+          <span class="progress-count"><span id="progress-current">1</span> / 20</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar" style="width:5%"></div>
+        </div>
+      </div>
+      <div class="q-category" id="q-category"></div>
+      <p class="q-text" id="q-text"></p>
+      <div class="choices" id="choices"></div>
+      <div class="quiz-nav">
+        <button class="btn btn-secondary" id="btn-prev" onclick="prevQuestion()">← 前へ</button>
+        <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()" disabled>
+          次へ →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 計算中 ===== -->
+  <section id="section-loading" class="section">
+    <div class="card">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <p style="font-size:16px; font-weight:700; color:var(--gray-700);">診断結果を集計中…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 結果 ===== -->
+  <section id="section-results" class="section">
+    <div class="card">
+      <div class="result-header">
+        <p style="font-size:14px; color:var(--gray-500); margin-bottom:8px;">BCP総合スコア</p>
+        <div class="result-score" id="result-score">0</div>
+        <div class="result-score-label">点 / 100点</div>
+        <div id="level-badge" class="level-badge"></div>
+        <p id="level-desc" class="level-desc"></p>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="radar-chart"></canvas>
+      </div>
+
+      <div class="domain-scores" id="domain-scores"></div>
+
+      <div class="result-cta">
+        <h3>詳細な診断レポートをお送りします</h3>
+        <p>課題領域の改善提案と、貴社に合ったBCP強化のアドバイスを無料でご提供します。</p>
+        <button class="btn-cta" onclick="showContact()">
+          無料で詳細レポートを受け取る →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== お客様情報 ===== -->
+  <section id="section-contact" class="section">
+    <div class="card">
+      <h2 class="form-title">診断レポートの送付先</h2>
+      <p class="form-desc">以下をご入力ください。営業日3日以内に詳細レポートをお送りします。</p>
+
+      <form id="contact-form" onsubmit="submitForm(event)">
+        <div class="form-group">
+          <label class="form-label">会社名<span class="required">必須</span></label>
+          <input type="text" class="form-input" id="field-company" placeholder="株式会社○○">
+          <p class="form-error" id="err-company">会社名を入力してください</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">部署名</label>
+          <input type="text" class="form-input" id="field-dept" placeholder="総務部・リスク管理部 など">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ご担当者名<span class="required">必須</span></label>
+          <input type="text" class="form-input" id="field-name" placeholder="山田 太郎">
+          <p class="form-error" id="err-name">お名前を入力してください</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メールアドレス<span class="required">必須</span></label>
+          <input type="email" class="form-input" id="field-email" placeholder="taro@example.co.jp">
+          <p class="form-error" id="err-email">正しいメールアドレスを入力してください</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">電話番号</label>
+          <input type="tel" class="form-input" id="field-tel" placeholder="03-0000-0000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">従業員数</label>
+          <select class="form-input" id="field-size">
+            <option value="">選択してください</option>
+            <option>〜20名</option>
+            <option>21〜50名</option>
+            <option>51〜100名</option>
+            <option>101〜300名</option>
+            <option>301〜1,000名</option>
+            <option>1,001名以上</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btn-submit">
+          送信して結果レポートを受け取る →
+        </button>
+        <p class="privacy-note">
+          ご入力いただいた情報は、診断レポートの送付および弊社からのご提案のみに使用します。<br>
+          第三者への提供は行いません。
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== サンキュー ===== -->
+  <section id="section-thankyou" class="section">
+    <div class="card">
+      <div class="thankyou-icon">✅</div>
+      <h2 class="thankyou-title">送信が完了しました</h2>
+      <p class="thankyou-desc">
+        ご回答いただきありがとうございます。<br>
+        営業日3日以内に、<strong>詳細な診断レポートと改善提案</strong>をメールにてお送りします。
+      </p>
+      <div class="thankyou-box">
+        <p style="font-weight:700; margin-bottom:10px;">📋 送付予定の内容</p>
+        <ul>
+          <li>BCP診断スコア（領域別・総合）</li>
+          <li>課題領域の改善提案</li>
+          <li>貴社業種に合ったBCP強化ポイント</li>
+          <li>弊社サービスのご案内（ご希望の場合）</li>
+        </ul>
+      </div>
+      <a href="https://resilab-jpn.com/" class="btn btn-secondary" style="width:100%; text-align:center;" target="_blank">
+        レジリエンスラボのホームページへ
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ===== 診断データ =====
+const CATEGORIES = [
+  { name: 'BCPの策定状況',    short: '①策定状況',    max: 12 },
+  { name: 'リスク認識・評価',  short: '②リスク認識',   max: 9  },
+  { name: '組織・体制',       short: '③組織・体制',   max: 12 },
+  { name: 'IT・情報管理',     short: '④IT・情報',     max: 9  },
+  { name: 'サプライチェーン',  short: '⑤サプライチェーン', max: 9  },
+  { name: '訓練・維持管理',   short: '⑥訓練・維持',   max: 9  },
+];
+
+const QUESTIONS = [
+  // ① BCPの策定状況 (4問)
+  {
+    cat: 0,
+    text: 'BCPが文書として作成・整備されていますか？',
+    choices: [
+      { text: 'はい、最新版が作成・整備されている', score: 3 },
+      { text: '作成中、または古いものが残っている', score: 1 },
+      { text: '作成していない', score: 0 },
+    ]
+  },
+  {
+    cat: 0,
+    text: 'BCPは経営層（社長・取締役会）に承認・周知されていますか？',
+    choices: [
+      { text: 'はい、経営層に承認・周知されている', score: 3 },
+      { text: '一部の経営層には伝わっている', score: 1 },
+      { text: 'いいえ、またはBCPがない', score: 0 },
+    ]
+  },
+  {
+    cat: 0,
+    text: 'BCPはどのくらいの頻度で見直していますか？',
+    choices: [
+      { text: '年1回以上、定期的に見直している', score: 3 },
+      { text: '数年に1回程度見直している', score: 1 },
+      { text: '見直したことがない、またはBCPがない', score: 0 },
+    ]
+  },
+  {
+    cat: 0,
+    text: 'BCPの担当者・責任者が明確に決まっていますか？',
+    choices: [
+      { text: 'はい、担当者・責任者が明確に決まっている', score: 3 },
+      { text: '暫定的に決まっているが、明文化されていない', score: 1 },
+      { text: '決まっていない', score: 0 },
+    ]
+  },
+  // ② リスク認識・評価 (3問)
+  {
+    cat: 1,
+    text: '自社の事業所周辺のハザードマップを確認していますか？',
+    choices: [
+      { text: 'はい、定期的に確認し、対策に活用している', score: 3 },
+      { text: '一度確認したことがある', score: 1 },
+      { text: '確認していない', score: 0 },
+    ]
+  },
+  {
+    cat: 1,
+    text: '災害時に継続すべき重要業務（コア業務）を特定していますか？',
+    choices: [
+      { text: 'はい、文書化・リスト化されている', score: 3 },
+      { text: '口頭では理解しているが、文書化されていない', score: 1 },
+      { text: '特定していない', score: 0 },
+    ]
+  },
+  {
+    cat: 1,
+    text: '重要業務を継続するための目標復旧時間（RTO）を設定していますか？',
+    choices: [
+      { text: 'はい、具体的なRTOが設定されている', score: 3 },
+      { text: '検討中、または概念としては理解している', score: 1 },
+      { text: '設定していない', score: 0 },
+    ]
+  },
+  // ③ 組織・体制 (4問)
+  {
+    cat: 2,
+    text: '災害時の指揮命令系統（誰が何を判断・決定するか）が明確ですか？',
+    choices: [
+      { text: 'はい、文書化され、社員に周知されている', score: 3 },
+      { text: '概ね決まっているが、周知が不十分', score: 1 },
+      { text: '決まっていない', score: 0 },
+    ]
+  },
+  {
+    cat: 2,
+    text: '全社員の安否確認の仕組みがありますか？',
+    choices: [
+      { text: 'はい、専用システム・アプリを導入し、訓練もしている', score: 3 },
+      { text: '電話・メール等で対応する予定だが、訓練はしていない', score: 1 },
+      { text: '仕組みがない', score: 0 },
+    ]
+  },
+  {
+    cat: 2,
+    text: '緊急時の社員・取引先・関係機関への連絡体制が整備されていますか？',
+    choices: [
+      { text: 'はい、連絡先リストが最新化・管理されている', score: 3 },
+      { text: '連絡先はあるが、最新化できていない', score: 1 },
+      { text: '整備されていない', score: 0 },
+    ]
+  },
+  {
+    cat: 2,
+    text: '本社・事業所が被災した場合の代替拠点（在宅勤務含む）を確保していますか？',
+    choices: [
+      { text: 'はい、具体的な代替拠点・手段が決まっている', score: 3 },
+      { text: '検討中、または在宅勤務が一部可能', score: 1 },
+      { text: '確保していない', score: 0 },
+    ]
+  },
+  // ④ IT・情報管理 (3問)
+  {
+    cat: 3,
+    text: '重要なデータ・システムのバックアップを定期的に取得していますか？',
+    choices: [
+      { text: 'はい、クラウドや遠隔地にバックアップし、復旧確認もしている', score: 3 },
+      { text: 'バックアップはあるが、同一拠点または復旧確認が不十分', score: 1 },
+      { text: 'バックアップを取っていない', score: 0 },
+    ]
+  },
+  {
+    cat: 3,
+    text: '基幹システムが使えなくなった場合の代替手段がありますか？',
+    choices: [
+      { text: 'はい、具体的な代替手段・手順が決まっている', score: 3 },
+      { text: '検討中、または紙・電話で対応できると考えている', score: 1 },
+      { text: 'ない', score: 0 },
+    ]
+  },
+  {
+    cat: 3,
+    text: '社員が遠隔地・在宅から業務を継続できる環境が整っていますか？',
+    choices: [
+      { text: 'はい、全員が在宅勤務できる環境が整っている', score: 3 },
+      { text: '一部の社員・業務のみ可能', score: 1 },
+      { text: '整っていない', score: 0 },
+    ]
+  },
+  // ⑤ サプライチェーン (3問)
+  {
+    cat: 4,
+    text: '自社の事業に影響する主要な仕入先・外注先・取引先を把握していますか？',
+    choices: [
+      { text: 'はい、重要取引先がリスト化・管理されている', score: 3 },
+      { text: '概ね把握しているが、リスト化されていない', score: 1 },
+      { text: '把握していない', score: 0 },
+    ]
+  },
+  {
+    cat: 4,
+    text: '主要な仕入先・取引先がBCPを策定しているか確認していますか？',
+    choices: [
+      { text: 'はい、確認し、連携・対策を取っている', score: 3 },
+      { text: '一部は確認している', score: 1 },
+      { text: '確認していない', score: 0 },
+    ]
+  },
+  {
+    cat: 4,
+    text: '主要な仕入先・取引先が被災した場合の代替調達先を確保していますか？',
+    choices: [
+      { text: 'はい、代替先が確保・契約されている', score: 3 },
+      { text: '検討中、または代替先の候補はある', score: 1 },
+      { text: '確保していない', score: 0 },
+    ]
+  },
+  // ⑥ 訓練・維持管理 (3問)
+  {
+    cat: 5,
+    text: 'BCPに基づいた訓練や演習を実施していますか？',
+    choices: [
+      { text: 'はい、年1回以上、実際に訓練・演習を実施している', score: 3 },
+      { text: '実施したことはあるが、定期的ではない', score: 1 },
+      { text: '実施していない', score: 0 },
+    ]
+  },
+  {
+    cat: 5,
+    text: '訓練結果や実際の災害経験をもとにBCPを改善していますか？',
+    choices: [
+      { text: 'はい、PDCAサイクルで継続的に改善している', score: 3 },
+      { text: '改善したことはあるが、継続的ではない', score: 1 },
+      { text: '改善していない', score: 0 },
+    ]
+  },
+  {
+    cat: 5,
+    text: '全社員がBCPの内容を理解し、自分の役割を把握していますか？',
+    choices: [
+      { text: 'はい、定期的な教育・周知を実施している', score: 3 },
+      { text: '一部の社員・担当者は理解している', score: 1 },
+      { text: '周知できていない', score: 0 },
+    ]
+  },
+];
+
+// ===== 状態管理 =====
+let currentQ = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let radarChart = null;
+
+// ===== セクション切り替え =====
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== 診断開始 =====
+function startQuiz() {
+  currentQ = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  renderQuestion();
+  showSection('section-quiz');
+}
+
+// ===== 質問描画 =====
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const cat = CATEGORIES[q.cat];
+
+  document.getElementById('progress-current').textContent = currentQ + 1;
+  document.getElementById('progress-bar').style.width = ((currentQ + 1) / QUESTIONS.length * 100) + '%';
+  document.getElementById('progress-category').textContent = cat.name;
+  document.getElementById('q-category').textContent = `領域${['①','②','③','④','⑤','⑥'][q.cat]} ${cat.name}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const label = document.createElement('label');
+    label.className = 'choice-label' + (answers[currentQ] === i ? ' selected' : '');
+    label.innerHTML = `
+      <input type="radio" name="choice" value="${i}">
+      <div class="choice-radio"></div>
+      <span>${c.text}</span>
+    `;
+    label.addEventListener('click', () => selectChoice(i));
+    choicesEl.appendChild(label);
+  });
+
+  // ボタン状態
+  document.getElementById('btn-prev').style.display = currentQ === 0 ? 'none' : '';
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = currentQ === QUESTIONS.length - 1 ? '診断結果を見る ✓' : '次へ →';
+  nextBtn.disabled = answers[currentQ] === null;
+}
+
+// ===== 選択処理 =====
+function selectChoice(index) {
+  answers[currentQ] = index;
+  document.querySelectorAll('.choice-label').forEach((l, i) => {
+    l.classList.toggle('selected', i === index);
+  });
+  document.getElementById('btn-next').disabled = false;
+}
+
+// ===== 前へ =====
+function prevQuestion() {
+  if (currentQ > 0) { currentQ--; renderQuestion(); }
+}
+
+// ===== 次へ =====
+function nextQuestion() {
+  if (answers[currentQ] === null) return;
+  if (currentQ < QUESTIONS.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+// ===== 結果計算・表示 =====
+function showResults() {
+  showSection('section-loading');
+  setTimeout(() => {
+    calcAndRender();
+    showSection('section-results');
+  }, 1200);
+}
+
+function calcAndRender() {
+  // カテゴリ別スコア計算
+  const catScores = CATEGORIES.map(() => 0);
+  QUESTIONS.forEach((q, i) => {
+    if (answers[i] !== null) catScores[q.cat] += q.choices[answers[i]].score;
+  });
+
+  // 総合スコア (100点換算)
+  const totalMax = CATEGORIES.reduce((s, c) => s + c.max, 0); // 60
+  const totalRaw = catScores.reduce((s, v) => s + v, 0);
+  const totalScore = Math.round(totalRaw / totalMax * 100);
+
+  // レベル判定
+  let level, levelClass, levelDesc;
+  if (totalScore >= 80) {
+    level = 'レベル A（優良）';
+    levelClass = 'level-A';
+    levelDesc = 'BCPが十分に整備されています。定期的な訓練と見直しを継続することで、さらなる実効性向上が期待できます。';
+  } else if (totalScore >= 60) {
+    level = 'レベル B（良好）';
+    levelClass = 'level-B';
+    levelDesc = 'BCPの基礎はできています。一部の領域に改善の余地があります。弱点を強化することで、より実効性の高いBCPが実現します。';
+  } else if (totalScore >= 40) {
+    level = 'レベル C（要改善）';
+    levelClass = 'level-C';
+    levelDesc = 'BCPの整備が不十分な状態です。重要領域への早急な対応が必要です。専門家とともに計画的な整備を進めることを推奨します。';
+  } else {
+    level = 'レベル D（要整備）';
+    levelClass = 'level-D';
+    levelDesc = 'BCPがほとんど整備されていない状態です。大規模災害が発生した場合、事業継続が困難になるリスクがあります。今すぐ専門家にご相談ください。';
+  }
+
+  // スコア表示（カウントアップ）
+  animateCount('result-score', totalScore, 1000);
+
+  // バッジ
+  const badge = document.getElementById('level-badge');
+  badge.className = 'level-badge ' + levelClass;
+  badge.textContent = level;
+  document.getElementById('level-desc').textContent = levelDesc;
+
+  // レーダーチャート
+  const catPcts = catScores.map((s, i) => Math.round(s / CATEGORIES[i].max * 100));
+  renderRadar(catPcts);
+
+  // 領域別バー
+  const domEl = document.getElementById('domain-scores');
+  domEl.innerHTML = '';
+  CATEGORIES.forEach((cat, i) => {
+    const pct = catPcts[i];
+    const item = document.createElement('div');
+    item.className = 'domain-score-item';
+    item.innerHTML = `
+      <div class="domain-score-name">${cat.short}</div>
+      <div class="domain-score-bar-bg">
+        <div class="domain-score-bar-fill" style="width:0%" data-target="${pct}"></div>
+      </div>
+      <div class="domain-score-val">${pct}点</div>
+    `;
+    domEl.appendChild(item);
+  });
+  // バーアニメーション
+  setTimeout(() => {
+    document.querySelectorAll('.domain-score-bar-fill').forEach(el => {
+      el.style.width = el.dataset.target + '%';
+    });
+  }, 100);
+
+  // 結果をwindowに保存（送信時に使用）
+  window._bcpResult = { totalScore, level, catScores, catPcts };
+}
+
+function renderRadar(pcts) {
+  if (radarChart) radarChart.destroy();
+  const ctx = document.getElementById('radar-chart').getContext('2d');
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: CATEGORIES.map(c => c.short),
+      datasets: [{
+        label: 'スコア',
+        data: pcts,
+        backgroundColor: 'rgba(200,0,45,0.12)',
+        borderColor: '#C8002D',
+        borderWidth: 2,
+        pointBackgroundColor: '#C8002D',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 20, font: { size: 11 } },
+          pointLabels: { font: { size: 12, weight: 'bold' } },
+          grid: { color: '#e8e8e8' },
+        }
+      },
+      plugins: { legend: { display: false } },
+    }
+  });
+}
+
+function animateCount(id, target, duration) {
+  const el = document.getElementById(id);
+  const start = Date.now();
+  const tick = () => {
+    const p = Math.min((Date.now() - start) / duration, 1);
+    el.textContent = Math.round(p * target);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ===== お客様情報フォームへ =====
+function showContact() {
+  showSection('section-contact');
+}
+
+// ===== フォーム送信 =====
+async function submitForm(e) {
+  e.preventDefault();
+
+  const company = document.getElementById('field-company').value.trim();
+  const name    = document.getElementById('field-name').value.trim();
+  const email   = document.getElementById('field-email').value.trim();
+
+  let valid = true;
+
+  if (!company) {
+    document.getElementById('err-company').style.display = 'block';
+    document.getElementById('field-company').classList.add('error');
+    valid = false;
+  } else {
+    document.getElementById('err-company').style.display = 'none';
+    document.getElementById('field-company').classList.remove('error');
+  }
+  if (!name) {
+    document.getElementById('err-name').style.display = 'block';
+    document.getElementById('field-name').classList.add('error');
+    valid = false;
+  } else {
+    document.getElementById('err-name').style.display = 'none';
+    document.getElementById('field-name').classList.remove('error');
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('err-email').style.display = 'block';
+    document.getElementById('field-email').classList.add('error');
+    valid = false;
+  } else {
+    document.getElementById('err-email').style.display = 'none';
+    document.getElementById('field-email').classList.remove('error');
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '送信中…';
+
+  const result = window._bcpResult || {};
+  const payload = {
+    company,
+    dept:  document.getElementById('field-dept').value.trim(),
+    name,
+    email,
+    tel:   document.getElementById('field-tel').value.trim(),
+    size:  document.getElementById('field-size').value,
+    totalScore: result.totalScore,
+    level: result.level,
+    catScores: result.catScores,
+    catPcts: result.catPcts,
+    answers,
+    submittedAt: new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch('/api/bcp-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('送信失敗');
+    showSection('section-thankyou');
+  } catch {
+    btn.disabled = false;
+    btn.textContent = '送信して結果レポートを受け取る →';
+    alert('送信に失敗しました。お手数ですが contact@resilience-lab.co.jp までご連絡ください。');
+  }
+}
+</script>
+</body>
+</html>

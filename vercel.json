@@ -2,10 +2,15 @@
   "version": 2,
   "builds": [
     { "src": "api/chat.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" }
+    { "src": "api/bcp-submit.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "bcp-check/index.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/chat", "dest": "/api/chat.js" },
+    { "src": "/api/bcp-submit", "dest": "/api/bcp-submit.js" },
+    { "src": "/bcp-check", "dest": "/bcp-check/index.html" },
+    { "src": "/bcp-check/", "dest": "/bcp-check/index.html" },
     { "src": "/", "dest": "/index.html" }
   ]
 }

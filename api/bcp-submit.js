@@ -25,13 +25,111 @@ const CATEGORIES = [
   '訓練・維持管理',
 ];
 
+// ===== 損失試算 =====
+
+// 業種 × 従業員数レンジ → 推計年商（百万円）
+const REVENUE_BY_INDUSTRY = {
+  '製造業':       { '〜20名':50,  '21〜50名':200,  '51〜100名':600,  '101〜300名':2000, '301〜1,000名':8000,  '1,001名以上':50000 },
+  '卸売業・小売業':{ '〜20名':80,  '21〜50名':300,  '51〜100名':800,  '101〜300名':3000, '301〜1,000名':12000, '1,001名以上':60000 },
+  '建設業':       { '〜20名':60,  '21〜50名':250,  '51〜100名':700,  '101〜300名':2500, '301〜1,000名':10000, '1,001名以上':40000 },
+  '情報通信業':   { '〜20名':60,  '21〜50名':220,  '51〜100名':600,  '101〜300名':2000, '301〜1,000名':8000,  '1,001名以上':40000 },
+  '医療・福祉':   { '〜20名':40,  '21〜50名':150,  '51〜100名':400,  '101〜300名':1500, '301〜1,000名':6000,  '1,001名以上':30000 },
+  '金融・保険':   { '〜20名':100, '21〜50名':400,  '51〜100名':1000, '101〜300名':4000, '301〜1,000名':15000, '1,001名以上':80000 },
+  '運輸・物流':   { '〜20名':50,  '21〜50名':200,  '51〜100名':500,  '101〜300名':1800, '301〜1,000名':7000,  '1,001名以上':35000 },
+  'サービス業':   { '〜20名':30,  '21〜50名':120,  '51〜100名':350,  '101〜300名':1200, '301〜1,000名':5000,  '1,001名以上':25000 },
+  'その他':       { '〜20名':40,  '21〜50名':160,  '51〜100名':450,  '101〜300名':1600, '301〜1,000名':6000,  '1,001名以上':30000 },
+};
+
+// 年商テキスト → 中央値（百万円）
+const REVENUE_TEXT_TO_MAN = {
+  '〜1億円':      50,
+  '1億〜5億円':   300,
+  '5億〜10億円':  750,
+  '10億〜50億円': 3000,
+  '50億〜100億円':7500,
+  '100億円以上':  20000,
+};
+
+/**
+ * 年商推計（百万円）
+ * - annualRevenue が入力されていればその中央値
+ * - なければ 業種 × 従業員数レンジから推計
+ */
+function estimateRevenueMillion(annualRevenue, industry, size) {
+  if (annualRevenue && REVENUE_TEXT_TO_MAN[annualRevenue]) {
+    return { value: REVENUE_TEXT_TO_MAN[annualRevenue], isInput: true };
+  }
+  const ind = industry || 'その他';
+  const sz  = size || '51〜100名';
+  const table = REVENUE_BY_INDUSTRY[ind] || REVENUE_BY_INDUSTRY['その他'];
+  const value = table[sz] ?? 450;
+  return { value, isInput: false };
+}
+
+/**
+ * 3シナリオ損失試算
+ * 期待損失 ≈ 発生確率 × 損失率 × 年商
+ * BCPスコアが低いほど損失率が高くなる補正をかける
+ * @returns {Array} 3シナリオの試算結果
+ */
+function calcLossScenarios(revenueMillion, totalScore) {
+  // BCPスコアによる損失倍率（スコアが低いほど被害が大きい）
+  const scoreFactor = totalScore >= 80 ? 0.4
+                    : totalScore >= 60 ? 0.7
+                    : totalScore >= 40 ? 1.0
+                    : 1.4;
+
+  const scenarios = [
+    {
+      name: '大規模自然災害',
+      icon: '🌊',
+      prob: '10年に1回（10%/年）',
+      lossRate: 0.30,  // 売上の30%相当
+      stopDays: totalScore >= 60 ? '約30〜90日' : '約90〜180日',
+      intangible: '取引先への信頼失墜・従業員の離職・ブランド毀損',
+    },
+    {
+      name: 'サイバー攻撃・システム障害',
+      icon: '💻',
+      prob: '5年に1回（20%/年）',
+      lossRate: 0.15,
+      stopDays: totalScore >= 60 ? '約3〜14日' : '約14〜60日',
+      intangible: '情報漏洩による賠償リスク・顧客離れ・株価下落',
+    },
+    {
+      name: 'パンデミック・感染症拡大',
+      icon: '🦠',
+      prob: '20年に1回（5%/年）',
+      lossRate: 0.20,
+      stopDays: totalScore >= 60 ? '約14〜30日' : '約30〜90日',
+      intangible: '採用ブランド低下・取引先の代替調達・官公庁評価への影響',
+    },
+  ];
+
+  return scenarios.map(s => {
+    const financialLossMillion = Math.round(revenueMillion * s.lossRate * scoreFactor);
+    return {
+      ...s,
+      financialLoss: financialLossMillion >= 10000
+        ? `約${(financialLossMillion / 10000).toFixed(1)}億円`
+        : `約${financialLossMillion.toLocaleString()}百万円`,
+      financialLossNum: financialLossMillion,
+    };
+  });
+}
+
 // Claude APIで改善提案レポートを生成
-async function generateReport({ company, size, totalScore, level, catPcts }) {
+async function generateReport({ company, size, industry, totalScore, level, catPcts, lossScenarios, revenueInfo }) {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const domainList = CATEGORIES
     .map((cat, i) => `・${cat}: ${catPcts?.[i] ?? 0}点 / 100点`)
     .join('\n');
+
+  const lossContext = lossScenarios ? `
+【リスクシナリオ別 損失試算（推計）】
+${lossScenarios.map(s => `・${s.name}：財務的損失 ${s.financialLoss}（事業停止期間 ${s.stopDays}）`).join('\n')}
+※推計年商 約${revenueInfo.value >= 10000 ? (revenueInfo.value/10000).toFixed(1)+'億円' : revenueInfo.value+'百万円'}（${revenueInfo.isInput ? '入力値' : '従業員数・業種から推計'}）をベースに算出。BCPなし・対策不十分な場合の参考値。` : '';
 
   const msg = await anthropic.messages.create({
     model: 'claude-opus-4-7',
@@ -43,6 +141,7 @@ async function generateReport({ company, size, totalScore, level, catPcts }) {
 
 【企業情報】
 会社名: ${company}
+業種: ${industry || '不明'}
 従業員数: ${size || '不明'}
 
 【診断結果】
@@ -51,6 +150,7 @@ async function generateReport({ company, size, totalScore, level, catPcts }) {
 
 【領域別スコア】
 ${domainList}
+${lossContext}
 
 【重要な注意】
 総合スコアが80点以上（レベルA・優良）の場合は、改善ではなく「さらなる高みへの発展・維持」の観点で提案してください。弱点を指摘するのではなく、現状を称えつつ、BCPの高度化・組織強化・業界リーダーとしての姿勢を提案する内容にしてください。
@@ -76,7 +176,7 @@ ${domainList}
 }
 
 // 顧客向けHTMLメール本文を生成
-function buildCustomerHtml({ company, name, totalScore, level, catPcts, report }) {
+function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, lossScenarios, revenueInfo }) {
   const levelColor = { A: '#2e7d32', B: '#1565c0', C: '#f57f17', D: '#C8002D' };
   const color = levelColor[level?.match(/[ABCD]/)?.[0]] ?? '#C8002D';
 
@@ -206,6 +306,37 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report }
           ${actionsHtml}
         </div>
 
+        <!-- リスクシナリオ別 損失試算 -->
+        ${lossScenarios ? `
+        <div style="margin-bottom:32px;">
+          <h2 style="font-size:16px; color:#C8002D; border-bottom:2px solid #C8002D; padding-bottom:8px; margin:0 0 8px;">■ BCP未整備の場合のリスクシナリオ別 損失試算</h2>
+          <p style="font-size:12px; color:#999; margin:0 0 16px;">
+            ※推計年商 約${revenueInfo.value >= 10000 ? (revenueInfo.value/10000).toFixed(1)+'億円' : revenueInfo.value+'百万円'}（${revenueInfo.isInput ? 'ご入力値' : '従業員数・業種からの推計値'}）をもとに算出した参考値です。保険数理的アプローチによる推計であり、実際の損失額を保証するものではありません。
+          </p>
+          ${lossScenarios.map(s => `
+          <div style="border:1px solid #eee; border-radius:10px; padding:16px; margin-bottom:12px; background:#fafafa;">
+            <p style="font-size:15px; font-weight:bold; color:#1a1a2e; margin:0 0 10px;">${s.icon} ${s.name}</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+              <tr>
+                <td style="color:#888; width:120px; padding:4px 0;">発生確率の目安</td>
+                <td style="color:#333; padding:4px 0;">${s.prob}</td>
+              </tr>
+              <tr>
+                <td style="color:#888; padding:4px 0;">推計 財務的損失</td>
+                <td style="color:#C8002D; font-weight:bold; font-size:15px; padding:4px 0;">${s.financialLoss}</td>
+              </tr>
+              <tr>
+                <td style="color:#888; padding:4px 0;">事業停止期間</td>
+                <td style="color:#333; padding:4px 0;">${s.stopDays}</td>
+              </tr>
+              <tr>
+                <td style="color:#888; padding:4px 0; vertical-align:top;">無形損失</td>
+                <td style="color:#555; padding:4px 0; line-height:1.6;">${s.intangible}</td>
+              </tr>
+            </table>
+          </div>`).join('')}
+        </div>` : ''}
+
         <!-- 締め -->
         <div style="background:#f9f9f9; border-radius:10px; padding:20px; margin-bottom:28px; border-left:4px solid #C8002D;">
           <p style="font-size:14px; color:#333; line-height:1.8; margin:0;">${report.closing}</p>
@@ -249,11 +380,17 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report }
 }
 
 // レジリエンスラボ社内向け通知メール
-function buildNotifyText({ company, dept, name, email, tel, size, totalScore, level, catPcts, submittedAt }) {
+function buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }) {
   const submitted = submittedAt
     ? new Date(submittedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
     : '不明';
   const domainRows = CATEGORIES.map((cat, i) => `  ${cat}: ${catPcts?.[i] ?? 0}点`).join('\n');
+  const revText = revenueInfo
+    ? `  推計年商  : 約${revenueInfo.value >= 10000 ? (revenueInfo.value/10000).toFixed(1)+'億円' : revenueInfo.value+'百万円'}（${revenueInfo.isInput ? '入力値' : '従業員数・業種から推計'}）`
+    : '';
+  const lossRows = lossScenarios
+    ? '\n■ 損失試算（推計）\n' + lossScenarios.map(s => `  ${s.name}: ${s.financialLoss}`).join('\n')
+    : '';
   return `【BCP診断ツール】新規リードが届きました
 
 ■ 受信日時: ${submitted}
@@ -264,7 +401,10 @@ function buildNotifyText({ company, dept, name, email, tel, size, totalScore, le
   担当者名: ${name}
   メール  : ${email}
   電話    : ${tel || '—'}
+  業種    : ${industry || '—'}
   従業員数: ${size || '—'}
+  年商目安: ${annualRevenue || '未入力'}
+${revText}
 
 ■ 診断結果
   総合スコア: ${totalScore ?? '—'} 点 / 100点
@@ -272,6 +412,7 @@ function buildNotifyText({ company, dept, name, email, tel, size, totalScore, le
 
 ■ 領域別スコア
 ${domainRows}
+${lossRows}
 
 ──────────────────────
 ※ 顧客へのAIレポートは自動送信済みです。
@@ -283,11 +424,15 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { company, dept, name, email, tel, size, totalScore, level, catPcts, submittedAt } = req.body;
+  const { company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt } = req.body;
 
   if (!company || !name || !email) {
     return res.status(400).json({ error: '必須項目が不足しています' });
   }
+
+  // 損失試算
+  const revenueInfo = estimateRevenueMillion(annualRevenue, industry, size);
+  const lossScenarios = calcLossScenarios(revenueInfo.value, totalScore ?? 30);
 
   // Resend API クライアントを初期化
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -295,7 +440,7 @@ module.exports = async (req, res) => {
   // AIレポート生成
   let report;
   try {
-    report = await generateReport({ company, size, totalScore, level, catPcts });
+    report = await generateReport({ company, size, industry, totalScore, level, catPcts, lossScenarios, revenueInfo });
   } catch (err) {
     console.error('Claude APIエラー:', err);
     report = {
@@ -311,7 +456,7 @@ module.exports = async (req, res) => {
 
   // 顧客へのレポートメール送信
   try {
-    const html = buildCustomerHtml({ company, name, totalScore, level, catPcts, report });
+    const html = buildCustomerHtml({ company, name, totalScore, level, catPcts, report, lossScenarios, revenueInfo });
     await resend.emails.send({
       from: 'レジリエンスラボ BCP診断 <report-noreply@resilab-jpn.com>',
       to: email,
@@ -329,7 +474,7 @@ module.exports = async (req, res) => {
       from: 'BCP診断ツール <report-noreply@resilab-jpn.com>',
       to: process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com',
       subject: `【新規リード】${company} 様 — スコア${totalScore}点（${level}）`,
-      text: buildNotifyText({ company, dept, name, email, tel, size, totalScore, level, catPcts, submittedAt }),
+      text: buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }),
     });
   } catch (err) {
     console.error('通知メール送信エラー:', err);
@@ -337,7 +482,7 @@ module.exports = async (req, res) => {
   }
 
   // Googleスプレッドシートにデータを記録
-  await saveToSheet({ company, dept, name, email, tel, size, totalScore, level, catPcts, submittedAt });
+  await saveToSheet({ company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt });
 
   // メール失敗時もデータをログに残す
   if (errors.length > 0) {

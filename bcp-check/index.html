@@ -567,6 +567,21 @@
           <input type="text" class="form-input" id="field-dept" placeholder="総務部・リスク管理部 など">
         </div>
         <div class="form-group">
+          <label class="form-label">業種</label>
+          <select class="form-input" id="field-industry">
+            <option value="">選択してください</option>
+            <option value="製造業">製造業</option>
+            <option value="卸売業・小売業">卸売業・小売業</option>
+            <option value="建設業">建設業</option>
+            <option value="情報通信業">情報通信業</option>
+            <option value="医療・福祉">医療・福祉</option>
+            <option value="金融・保険">金融・保険</option>
+            <option value="運輸・物流">運輸・物流</option>
+            <option value="サービス業">サービス業</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label class="form-label">ご担当者名<span class="required">必須</span></label>
           <input type="text" class="form-input" id="field-name" placeholder="山田 太郎">
           <p class="form-error" id="err-name">お名前を入力してください</p>
@@ -590,6 +605,18 @@
             <option>101〜300名</option>
             <option>301〜1,000名</option>
             <option>1,001名以上</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">年商の目安 <span style="font-size:11px; color:var(--muted); font-weight:normal;">（任意・リスク試算の精度向上に使用）</span></label>
+          <select class="form-input" id="field-revenue">
+            <option value="">選択してください（未入力でも診断できます）</option>
+            <option value="〜1億円">〜1億円</option>
+            <option value="1億〜5億円">1億〜5億円</option>
+            <option value="5億〜10億円">5億〜10億円</option>
+            <option value="10億〜50億円">10億〜50億円</option>
+            <option value="50億〜100億円">50億〜100億円</option>
+            <option value="100億円以上">100億円以上</option>
           </select>
         </div>
 
@@ -1082,8 +1109,10 @@ async function submitForm(e) {
     dept:  document.getElementById('field-dept').value.trim(),
     name,
     email,
-    tel:   document.getElementById('field-tel').value.trim(),
-    size:  document.getElementById('field-size').value,
+    tel:      document.getElementById('field-tel').value.trim(),
+    size:     document.getElementById('field-size').value,
+    industry: document.getElementById('field-industry').value,
+    annualRevenue: document.getElementById('field-revenue').value,
     totalScore: result.totalScore,
     level: result.level,
     catScores: result.catScores,

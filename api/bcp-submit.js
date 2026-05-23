@@ -63,9 +63,7 @@ ${domainList}
 // 顧客向けHTMLメール本文を生成
 function buildCustomerHtml({ company, name, totalScore, level, catPcts, report }) {
   const levelColor = { A: '#2e7d32', B: '#1565c0', C: '#f57f17', D: '#C8002D' };
-  const lKey = level?.charAt(level.indexOf('A') >= 0 ? level.indexOf('A') : level.indexOf('B') >= 0 ? level.indexOf('B') : level.indexOf('C') >= 0 ? level.indexOf('C') : level.indexOf('D')) ?? 'D';
-  const lLetter = level?.match(/[ABCD]/)?.[0] ?? 'D';
-  const color = levelColor[lLetter] ?? '#C8002D';
+  const color = levelColor[level?.match(/[ABCD]/)?.[0]] ?? '#C8002D';
 
   const domainBars = CATEGORIES.map((cat, i) => {
     const pct = catPcts?.[i] ?? 0;

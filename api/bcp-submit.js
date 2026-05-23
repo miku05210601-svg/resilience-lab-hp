@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const Anthropic = require('@anthropic-ai/sdk');
 
 const CATEGORIES = [
@@ -274,17 +274,8 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: '必須項目が不足しています' });
   }
 
-  // メール送信設定（ポート465はSSL、587はSTARTTLS）
-  const smtpPort = parseInt(process.env.SMTP_PORT || '465');
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'mail.lolipop.jp',
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+  // Resend API クライアントを初期化
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   // AIレポート生成
   let report;
@@ -306,8 +297,8 @@ module.exports = async (req, res) => {
   // 顧客へのレポートメール送信
   try {
     const html = buildCustomerHtml({ company, name, totalScore, level, catPcts, report });
-    await transporter.sendMail({
-      from: `"レジリエンスラボ BCP診断" <${process.env.SMTP_USER}>`,
+    await resend.emails.send({
+      from: 'レジリエンスラボ BCP診断 <report-noreply@resilab-jpn.com>',
       to: email,
       subject: `【BCP診断レポート】${company}様 — 総合スコア${totalScore}点（${level}）`,
       html,
@@ -319,9 +310,9 @@ module.exports = async (req, res) => {
 
   // レジリエンスラボへの通知メール送信
   try {
-    await transporter.sendMail({
-      from: `"BCP診断ツール" <${process.env.SMTP_USER}>`,
-      to: process.env.NOTIFY_EMAIL || 'contact@resilience-lab.co.jp',
+    await resend.emails.send({
+      from: 'BCP診断ツール <report-noreply@resilab-jpn.com>',
+      to: process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com',
       subject: `【新規リード】${company} 様 — スコア${totalScore}点（${level}）`,
       text: buildNotifyText({ company, dept, name, email, tel, size, totalScore, level, catPcts, submittedAt }),
     });

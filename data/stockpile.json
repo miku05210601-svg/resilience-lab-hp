@@ -38,6 +38,19 @@
       "unit": "セット",
       "expiry": "",
       "memo": "医務室"
+    },
+    {
+      "id": "20ae8824-9975-4075-aad6-0e076cc7d610",
+      "name": "ミネラルウォーター500mL",
+      "category": "水",
+      "location": "本社",
+      "unitQty": 15,
+      "boxes": 1,
+      "loose": 0,
+      "required": 0,
+      "unit": "本",
+      "expiry": "2027-08-27",
+      "memo": ""
     }
   ]
 }

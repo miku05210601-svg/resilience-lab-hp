@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "code": "resilab",
+    "name": "株式会社レジリエンスラボ",
+    "passwordHash": "253955ac66d967f2598b6b4d52eb60b08e431850bf6058716e37610a993c57c1",
+    "tokenHash": "1072efb7fbb54af72ba009d683606fd0c0b8330dfce592d3bfca17118bc06d54",
+    "created": "2026-05-24"
+  }
+]

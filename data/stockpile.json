@@ -1,6 +1,9 @@
 {
   "contacts": [],
-  "locations": ["本社"],
+  "locations": [
+    "本社",
+    "大阪支店"
+  ],
   "alertDays": 90,
   "items": [
     {

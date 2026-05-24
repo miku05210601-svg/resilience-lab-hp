@@ -671,7 +671,17 @@ tr.row-warning td { background: #fffdf0; }
 
 <script>
 // ─ 状態管理 ─────────────────────────────────
-let token = sessionStorage.getItem('stockpile_token') || '';
+// URLから会社コードを取得（/stockpile/abc-company → 'abc-company'）
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const companyCode = pathParts[1] || '';  // /stockpile/[code]
+
+// 会社コードがある場合は会社別APIを使用、ない場合は旧APIを使用
+const API_LOGIN  = companyCode ? `/api/stockpile/${companyCode}/login`     : '/api/stockpile/login';
+const API_DATA   = companyCode ? `/api/stockpile/${companyCode}/data`       : '/api/stockpile/data';
+const API_ALERT  = companyCode ? `/api/stockpile/${companyCode}/send-alert` : '/api/stockpile/send-alert';
+const TOKEN_KEY  = companyCode ? `stockpile_token_${companyCode}`           : 'stockpile_token';
+
+let token = sessionStorage.getItem(TOKEN_KEY) || '';
 let data = { contacts: [], locations: ['本社'], alertDays: 90, items: [] };
 let statusFilter = '';
 let deleteTargetId = null;
@@ -694,12 +704,17 @@ async function api(method, path, body) {
 
 // ─ 初期化 ────────────────────────────────────
 async function init() {
+  // 会社コードがある場合、会社名をタイトルに表示
+  if (companyCode) {
+    document.title = `備蓄品管理 | ${companyCode}`;
+  }
+
   if (token) {
     try {
-      data = await api('GET', '/api/stockpile/data');
+      data = await api('GET', API_DATA);
       showMain();
     } catch {
-      sessionStorage.removeItem('stockpile_token');
+      sessionStorage.removeItem(TOKEN_KEY);
       token = '';
       showLogin();
     }
@@ -726,7 +741,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
   const err = document.getElementById('login-error');
   err.style.display = 'none';
   try {
-    const res = await fetch('/api/stockpile/login', {
+    const res = await fetch(API_LOGIN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: pw }),
@@ -734,8 +749,12 @@ document.getElementById('login-form').addEventListener('submit', async e => {
     if (!res.ok) { err.style.display = 'block'; return; }
     const json = await res.json();
     token = json.token;
-    sessionStorage.setItem('stockpile_token', token);
-    data = await api('GET', '/api/stockpile/data');
+    sessionStorage.setItem(TOKEN_KEY, token);
+    // 会社名をヘッダーに表示
+    if (json.companyName) {
+      document.querySelector('.login-sub').textContent = json.companyName;
+    }
+    data = await api('GET', API_DATA);
     showMain();
   } catch {
     err.style.display = 'block';
@@ -744,7 +763,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
 
 // ─ ログアウト ─────────────────────────────────
 document.getElementById('btn-logout').addEventListener('click', () => {
-  sessionStorage.removeItem('stockpile_token');
+  sessionStorage.removeItem(TOKEN_KEY);
   token = '';
   location.reload();
 });
@@ -1165,7 +1184,7 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
 
       // 既存データに追記して保存
       data.items = [...data.items, ...added];
-      await api('POST', '/api/stockpile/data', data);
+      await api('POST', API_DATA, data);
       renderTable();
       renderDashboard();
       showToast(`${added.length}件の品目を取り込みました`, 'success');
@@ -1212,7 +1231,7 @@ document.getElementById('btn-send-alert').addEventListener('click', async () => 
   btn.disabled = true;
   btn.textContent = '送信中...';
   try {
-    await api('POST', '/api/stockpile/send-alert');
+    await api('POST', API_ALERT);
     showToast(`${alertItems.length}件のアラートメールを送信しました`, 'success');
   } catch (err) {
     showToast('送信に失敗しました: ' + err.message, 'error');
@@ -1224,7 +1243,7 @@ document.getElementById('btn-send-alert').addEventListener('click', async () => 
 
 // ─ データ保存 ─────────────────────────────────
 async function saveData() {
-  await api('POST', '/api/stockpile/data', data);
+  await api('POST', API_DATA, data);
 }
 
 // ─ モーダル制御 ──────────────────────────────

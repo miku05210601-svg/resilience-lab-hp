@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(gh auth status)",
+      "mcp__mcp-registry__list_connectors",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}

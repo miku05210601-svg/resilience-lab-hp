@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const https = require('https');
 
 const GITHUB_OWNER = 'miku05210601-svg';
 const GITHUB_REPO = 'resilience-lab-hp';
@@ -16,23 +17,47 @@ function authCheck(req) {
   return auth === `Bearer ${getStockpileToken()}`;
 }
 
-async function githubRequest(method, path, body) {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error('GITHUB_TOKEN が未設定です');
-  const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`, {
-    method,
-    headers: {
-      Authorization: `token ${token}`,
-      Accept: 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-    },
-    body: body ? JSON.stringify(body) : undefined,
+// https モジュールでGitHub APIを呼ぶ（fetch不要）
+function githubRequest(method, path, body) {
+  return new Promise((resolve, reject) => {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      return reject(new Error('GITHUB_TOKEN が未設定です'));
+    }
+
+    const bodyStr = body ? JSON.stringify(body) : null;
+    const options = {
+      hostname: 'api.github.com',
+      path: `/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`,
+      method,
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'resilience-lab-stockpile',
+        ...(bodyStr ? { 'Content-Length': Buffer.byteLength(bodyStr) } : {}),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 400) {
+          return reject(new Error(`GitHub API エラー ${res.statusCode}: ${data}`));
+        }
+        try {
+          resolve(JSON.parse(data));
+        } catch (e) {
+          reject(new Error(`JSONパースエラー: ${data}`));
+        }
+      });
+    });
+
+    req.on('error', reject);
+    if (bodyStr) req.write(bodyStr);
+    req.end();
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`GitHub API エラー ${res.status}: ${text}`);
-  }
-  return res.json();
 }
 
 async function loadStockpile() {

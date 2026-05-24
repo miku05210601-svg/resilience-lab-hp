@@ -1,4 +1,40 @@
+const https = require('https');
 const { authCheck, loadStockpile, getStatus } = require('./_helpers');
+
+// https モジュールでResend APIを呼ぶ
+function resendPost(payload) {
+  return new Promise((resolve, reject) => {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return reject(new Error('RESEND_API_KEY が未設定です'));
+
+    const bodyStr = JSON.stringify(payload);
+    const options = {
+      hostname: 'api.resend.com',
+      path: '/emails',
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(bodyStr),
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 400) {
+          return reject(new Error(`Resend API エラー ${res.statusCode}: ${data}`));
+        }
+        try { resolve(JSON.parse(data)); } catch { resolve(data); }
+      });
+    });
+
+    req.on('error', reject);
+    req.write(bodyStr);
+    req.end();
+  });
+}
 
 async function sendAlertWithResend(data) {
   const alertItems = data.items.filter(item =>
@@ -31,7 +67,7 @@ async function sendAlertWithResend(data) {
   const html = `
     <div style="font-family:'Hiragino Kaku Gothic ProN','Yu Gothic UI',sans-serif;max-width:700px;margin:0 auto">
       <div style="background:#8b1a2e;color:#fff;padding:20px 24px;border-radius:8px 8px 0 0">
-        <h2 style="margin:0;font-size:18px">🔔 備蓄品期限アラート（${today}）</h2>
+        <h2 style="margin:0;font-size:18px">備蓄品期限アラート（${today}）</h2>
       </div>
       <div style="background:#fff;padding:20px 24px;border:1px solid #e5e0db;border-top:none;border-radius:0 0 8px 8px">
         <p style="color:#3d3d3d">以下の備蓄品について確認が必要です。</p>
@@ -55,28 +91,13 @@ async function sendAlertWithResend(data) {
       </div>
     </div>`;
 
-  const to = data.contacts.map(c => ({ email: c.email, name: c.name }));
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error('RESEND_API_KEY が未設定です');
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: '備蓄品管理システム <noreply@resilab-jpn.com>',
-      to: to.map(t => t.email),
-      subject: `【備蓄品アラート】${alertItems.length}件の確認が必要です（${today}）`,
-      html,
-    }),
+  await resendPost({
+    from: '備蓄品管理システム <onboarding@resend.dev>',
+    to: data.contacts.map(c => c.email),
+    subject: `【備蓄品アラート】${alertItems.length}件の確認が必要です（${today}）`,
+    html,
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Resend APIエラー: ${text}`);
-  }
   return { sent: true, count: alertItems.length };
 }
 
@@ -89,6 +110,7 @@ module.exports = async (req, res) => {
     const result = await sendAlertWithResend(data);
     res.json({ ok: true, ...result });
   } catch (err) {
+    console.error('send-alert エラー:', err.message);
     res.status(500).json({ error: err.message });
   }
 };

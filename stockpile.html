@@ -506,6 +506,8 @@ tr.row-warning td { background: #fffdf0; }
     <div class="toolbar">
       <button class="btn-primary" id="btn-add">＋ 品目追加</button>
       <button class="btn-secondary" id="btn-export">📥 CSVエクスポート</button>
+      <button class="btn-secondary" id="btn-import">📤 CSVインポート</button>
+      <input type="file" id="csv-file-input" accept=".csv" style="display:none">
       <button class="btn-secondary" id="btn-send-alert">📧 アラートメール送信</button>
       <div class="toolbar-spacer"></div>
       <div style="font-size:12px;color:var(--muted)" id="item-count"></div>
@@ -1039,6 +1041,104 @@ document.getElementById('btn-export').addEventListener('click', () => {
   a.click();
   showToast('CSVをエクスポートしました', 'success');
 });
+
+// ─ CSVインポート ──────────────────────────────
+document.getElementById('btn-import').addEventListener('click', () => {
+  document.getElementById('csv-file-input').value = '';
+  document.getElementById('csv-file-input').click();
+});
+
+document.getElementById('csv-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    try {
+      // BOM除去
+      let text = ev.target.result.replace(/^﻿/, '');
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { showToast('データが空です', 'error'); return; }
+
+      // ヘッダー行を読んでカラム位置を判定
+      const headers = parseCSVLine(lines[0]);
+      const idx = {
+        name:     headers.indexOf('品名'),
+        category: headers.indexOf('カテゴリ'),
+        location: headers.indexOf('拠点'),
+        stock:    headers.indexOf('在庫数'),
+        required: headers.indexOf('必要数'),
+        unit:     headers.indexOf('単位'),
+        expiry:   headers.indexOf('使用期限'),
+        memo:     headers.indexOf('メモ'),
+      };
+
+      if (idx.name === -1) {
+        showToast('「品名」列が見つかりません。エクスポートしたCSVを使用してください', 'error');
+        return;
+      }
+
+      const added = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (!cols[idx.name]) continue; // 品名が空の行はスキップ
+
+        // 使用期限：YYYY-MM-DD 形式に正規化
+        let expiry = idx.expiry >= 0 ? (cols[idx.expiry] || '').trim() : '';
+        if (expiry && !/^\d{4}-\d{2}-\d{2}$/.test(expiry)) {
+          // YYYY/MM/DD → YYYY-MM-DD
+          expiry = expiry.replace(/\//g, '-');
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry)) expiry = '';
+        }
+
+        added.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + i,
+          name:     (cols[idx.name] || '').trim(),
+          category: idx.category >= 0 ? (cols[idx.category] || 'その他').trim() : 'その他',
+          location: idx.location >= 0 ? (cols[idx.location] || data.locations[0]).trim() : data.locations[0],
+          stock:    idx.stock >= 0 ? (parseInt(cols[idx.stock]) || 0) : 0,
+          required: idx.required >= 0 ? (parseInt(cols[idx.required]) || 0) : 0,
+          unit:     idx.unit >= 0 ? (cols[idx.unit] || '個').trim() : '個',
+          expiry,
+          memo:     idx.memo >= 0 ? (cols[idx.memo] || '').trim() : '',
+        });
+      }
+
+      if (added.length === 0) { showToast('取り込める品目がありませんでした', 'error'); return; }
+
+      // 既存データに追記して保存
+      data.items = [...data.items, ...added];
+      await api('POST', '/api/stockpile/data', data);
+      renderTable();
+      renderDashboard();
+      showToast(`${added.length}件の品目を取り込みました`, 'success');
+    } catch (err) {
+      showToast('CSVの読み込みに失敗しました: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+});
+
+// CSV1行をパース（ダブルクォート対応）
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') { inQ = false; }
+      else { cur += ch; }
+    } else {
+      if (ch === '"') { inQ = true; }
+      else if (ch === ',') { result.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+  }
+  result.push(cur);
+  return result;
+}
 
 // ─ アラートメール送信 ──────────────────────────
 document.getElementById('btn-send-alert').addEventListener('click', async () => {

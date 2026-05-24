@@ -1,0 +1,40 @@
+{
+  "contacts": [],
+  "locations": ["本社"],
+  "alertDays": 90,
+  "items": [
+    {
+      "id": "sample-1",
+      "name": "ミネラルウォーター 2L",
+      "category": "水",
+      "location": "本社",
+      "stock": 50,
+      "required": 30,
+      "unit": "本",
+      "expiry": "2026-12-31",
+      "memo": "倉庫3棚"
+    },
+    {
+      "id": "sample-2",
+      "name": "アルファ米（白飯）",
+      "category": "食料",
+      "location": "本社",
+      "stock": 20,
+      "required": 30,
+      "unit": "食",
+      "expiry": "2025-06-30",
+      "memo": ""
+    },
+    {
+      "id": "sample-3",
+      "name": "救急セット",
+      "category": "医療・衛生",
+      "location": "本社",
+      "stock": 3,
+      "required": 2,
+      "unit": "セット",
+      "expiry": "",
+      "memo": "医務室"
+    }
+  ]
+}

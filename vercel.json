@@ -3,14 +3,31 @@
   "builds": [
     { "src": "api/chat.js", "use": "@vercel/node" },
     { "src": "api/bcp-submit.js", "use": "@vercel/node" },
+    { "src": "api/stockpile/login.js", "use": "@vercel/node" },
+    { "src": "api/stockpile/data.js", "use": "@vercel/node" },
+    { "src": "api/stockpile/send-alert.js", "use": "@vercel/node" },
+    { "src": "api/cron/stockpile.js", "use": "@vercel/node" },
     { "src": "index.html", "use": "@vercel/static" },
+    { "src": "stockpile.html", "use": "@vercel/static" },
     { "src": "bcp-check/index.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/chat", "dest": "/api/chat.js" },
     { "src": "/api/bcp-submit", "dest": "/api/bcp-submit.js" },
+    { "src": "/api/stockpile/login", "dest": "/api/stockpile/login.js" },
+    { "src": "/api/stockpile/data", "dest": "/api/stockpile/data.js" },
+    { "src": "/api/stockpile/send-alert", "dest": "/api/stockpile/send-alert.js" },
+    { "src": "/api/cron/stockpile", "dest": "/api/cron/stockpile.js" },
+    { "src": "/stockpile", "dest": "/stockpile.html" },
+    { "src": "/stockpile/", "dest": "/stockpile.html" },
     { "src": "/bcp-check", "dest": "/bcp-check/index.html" },
     { "src": "/bcp-check/", "dest": "/bcp-check/index.html" },
     { "src": "/", "dest": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/stockpile",
+      "schedule": "0 0 * * *"
+    }
   ]
 }

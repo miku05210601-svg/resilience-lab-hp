@@ -112,28 +112,120 @@
       margin-bottom: 32px;
       line-height: 1.8;
     }
-    .intro-meta {
+    /* 痛点リスト */
+    .pain-list {
+      list-style: none;
+      background: var(--gray-100);
+      border-left: 4px solid var(--red);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin-bottom: 32px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 40px;
+      flex-direction: column;
+      gap: 8px;
     }
-    .meta-item {
+    .pain-list li {
+      font-size: 14px;
+      color: var(--gray-700);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.6;
+    }
+    .pain-list li::before {
+      content: '💬';
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+    /* 受け取れるもの */
+    .benefit-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 14px;
-      color: var(--gray-700);
-      background: var(--gray-100);
-      padding: 8px 16px;
-      border-radius: 8px;
     }
-    .meta-item .icon { font-size: 18px; }
+    .benefit-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 16px;
+      background: var(--red);
+      border-radius: 2px;
+    }
+    .benefit-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 480px) { .benefit-grid { grid-template-columns: 1fr; } }
+    .benefit-card {
+      background: var(--white);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .benefit-card .b-icon { font-size: 24px; }
+    .benefit-card .b-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray-900);
+      line-height: 1.4;
+    }
+    .benefit-card .b-desc {
+      font-size: 12px;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+    /* ステップ */
+    .step-flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 32px;
+      background: var(--gray-100);
+      border-radius: 10px;
+      padding: 14px 16px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--gray-700);
+    }
+    .step-num {
+      background: var(--red);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-arrow {
+      color: var(--gray-500);
+      font-size: 12px;
+      margin: 0 4px;
+    }
+    /* カテゴリチップ */
     .domains {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 40px;
+      gap: 8px;
+      margin-bottom: 32px;
     }
     @media (max-width: 480px) { .domains { grid-template-columns: repeat(2, 1fr); } }
     .domain-chip {
@@ -141,17 +233,41 @@
       border: 1px solid var(--gray-200);
       border-radius: 8px;
       padding: 10px 12px;
-      font-size: 13px;
+      font-size: 12px;
       text-align: center;
       color: var(--gray-700);
     }
     .domain-chip .num {
       display: block;
-      font-size: 11px;
+      font-size: 10px;
       color: var(--red);
       font-weight: 700;
       margin-bottom: 2px;
     }
+    /* CTAノート */
+    .cta-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-top: 10px;
+    }
+    .intro-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--gray-700);
+      background: var(--gray-100);
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+    .meta-item .icon { font-size: 16px; }
 
     /* ===== ボタン ===== */
     .btn {
@@ -452,33 +568,90 @@
   <!-- ===== イントロ ===== -->
   <section id="section-intro" class="section active">
     <div class="card">
-      <div class="intro-badge">無料・約3分</div>
+      <div class="intro-badge">無料・約3分・登録不要</div>
       <h1 class="intro-title">
-        3分でわかる、<br>
-        あなたの会社の<em>BCP対策レベル</em>
+        御社のBCP対策、<br>
+        <em>経営層に説明できますか？</em>
       </h1>
       <p class="intro-desc">
-        経営層への報告にも使えるBCP診断レポートを無料でお届けします。<br>
-        20の設問に答えるだけで、自社の現状・課題・改善提案がAIによって自動作成されます。
+        20問に答えるだけで、AIが自社のBCP現状を診断。<br>
+        そのまま経営層への報告に使えるレポートを無料でお届けします。
       </p>
+
+      <!-- 痛点チェック -->
+      <ul class="pain-list">
+        <li>BCPを整備しているが、本当に機能するか自信がない</li>
+        <li>万が一の時、いくら損失が出るかわからない</li>
+        <li>経営層へのBCP説明資料を作る時間がない</li>
+      </ul>
+
+      <!-- 受け取れるもの -->
+      <p class="benefit-title">診断を受けると、こんなレポートが届きます</p>
+      <div class="benefit-grid">
+        <div class="benefit-card">
+          <span class="b-icon">📊</span>
+          <span class="b-label">7領域レーダーチャート</span>
+          <span class="b-desc">強み・弱みが一目でわかる可視化レポート</span>
+        </div>
+        <div class="benefit-card">
+          <span class="b-icon">💴</span>
+          <span class="b-label">リスク損失試算</span>
+          <span class="b-desc">災害・サイバー・パンデミックで「いくら失うか」を数値化</span>
+        </div>
+        <div class="benefit-card">
+          <span class="b-icon">✅</span>
+          <span class="b-label">優先アクション TOP3</span>
+          <span class="b-desc">今すぐ取り組むべき改善策をAIが具体的に提案</span>
+        </div>
+        <div class="benefit-card">
+          <span class="b-icon">🏢</span>
+          <span class="b-label">経営層への報告資料</span>
+          <span class="b-desc">そのまま役員会・稟議に提出できるレポート形式</span>
+        </div>
+      </div>
+
+      <!-- ステップ -->
+      <div class="step-flow">
+        <div class="step-item">
+          <span class="step-num">1</span>
+          <span>20問に回答（約3分）</span>
+        </div>
+        <span class="step-arrow">▶</span>
+        <div class="step-item">
+          <span class="step-num">2</span>
+          <span>スコアをすぐ表示</span>
+        </div>
+        <span class="step-arrow">▶</span>
+        <div class="step-item">
+          <span class="step-num">3</span>
+          <span>詳細レポートをメール受信</span>
+        </div>
+      </div>
+
+      <!-- メタ情報 -->
       <div class="intro-meta">
         <div class="meta-item"><span class="icon">📋</span> 全20問</div>
         <div class="meta-item"><span class="icon">⏱</span> 約3分</div>
         <div class="meta-item"><span class="icon">🏢</span> 経営者・BCP担当者向け</div>
-        <div class="meta-item"><span class="icon">💴</span> 無料</div>
+        <div class="meta-item"><span class="icon">💴</span> 完全無料</div>
       </div>
-      <p style="font-size:14px; font-weight:700; color:var(--gray-700); margin-bottom:12px;">診断領域（6カテゴリ）</p>
+
+      <!-- 診断領域 -->
+      <p class="benefit-title">診断領域（7カテゴリ）</p>
       <div class="domains">
-        <div class="domain-chip"><span class="num">領域①</span>BCPの策定状況</div>
-        <div class="domain-chip"><span class="num">領域②</span>リスク認識・評価</div>
-        <div class="domain-chip"><span class="num">領域③</span>組織・体制</div>
-        <div class="domain-chip"><span class="num">領域④</span>IT・情報管理</div>
-        <div class="domain-chip"><span class="num">領域⑤</span>サプライチェーン</div>
-        <div class="domain-chip"><span class="num">領域⑥</span>訓練・維持管理</div>
+        <div class="domain-chip"><span class="num">領域①</span>経営・体制</div>
+        <div class="domain-chip"><span class="num">領域②</span>リスク認識</div>
+        <div class="domain-chip"><span class="num">領域③</span>重要業務・連絡</div>
+        <div class="domain-chip"><span class="num">領域④</span>設備・物理対策</div>
+        <div class="domain-chip"><span class="num">領域⑤</span>IT・データ</div>
+        <div class="domain-chip"><span class="num">領域⑥</span>サプライチェーン</div>
+        <div class="domain-chip"><span class="num">領域⑦</span>訓練・維持管理</div>
       </div>
+
       <button class="btn btn-primary" onclick="startQuiz()">
-        診断をはじめる →
+        無料で診断をはじめる →
       </button>
+      <p class="cta-note">登録不要・メールアドレスは診断後に入力（任意）</p>
     </div>
   </section>
 

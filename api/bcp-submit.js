@@ -458,17 +458,20 @@ module.exports = async (req, res) => {
   const errors = [];
 
   // 顧客へのレポートメール送信
+  let customerMailResult = null;
   try {
     const html = buildCustomerHtml({ company, name, totalScore, level, catPcts, report, lossScenarios, revenueInfo });
-    await resend.emails.send({
+    customerMailResult = await resend.emails.send({
       from: 'レジリエンスラボ BCP診断 <report-noreply@resilab-jpn.com>',
       to: email,
       subject: `【BCP診断レポート】${company}様 — 総合スコア${totalScore}点（${level}）`,
       html,
     });
+    console.log('顧客メール送信結果:', JSON.stringify(customerMailResult));
   } catch (err) {
-    console.error('顧客メール送信エラー:', err);
+    console.error('顧客メール送信エラー:', err.message, err.name);
     errors.push('customer_mail_failed');
+    customerMailResult = { error: err.message };
   }
 
   // レジリエンスラボへの通知メール送信
@@ -492,5 +495,5 @@ module.exports = async (req, res) => {
     console.log('診断データバックアップ:', JSON.stringify(req.body));
   }
 
-  return res.status(200).json({ ok: true, warnings: errors });
+  return res.status(200).json({ ok: true, warnings: errors, _debug: { customerMailResult, to: email } });
 };

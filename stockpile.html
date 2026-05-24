@@ -521,7 +521,10 @@ tr.row-warning td { background: #fffdf0; }
             <th data-sort="name">品名</th>
             <th data-sort="category">カテゴリ</th>
             <th data-sort="location">拠点</th>
-            <th data-sort="stock">在庫数</th>
+            <th>1箱入数</th>
+            <th>箱数</th>
+            <th>バラ数</th>
+            <th data-sort="stock">総数量</th>
             <th>過不足</th>
             <th data-sort="expiry">使用期限</th>
             <th>状態</th>
@@ -553,8 +556,9 @@ tr.row-warning td { background: #fffdf0; }
           <select class="form-select" id="item-category">
             <option value="水">水</option>
             <option value="食料">食料</option>
-            <option value="医療・衛生">医療・衛生</option>
-            <option value="照明・電源">照明・電源</option>
+            <option value="トイレ">トイレ</option>
+            <option value="衛生">衛生</option>
+            <option value="電源・照明">電源・照明</option>
             <option value="その他">その他</option>
           </select>
         </div>
@@ -565,16 +569,30 @@ tr.row-warning td { background: #fffdf0; }
       </div>
       <div class="form-row-3" style="margin-top:16px">
         <div class="form-row" style="margin-bottom:0">
-          <label class="form-label">在庫数</label>
-          <input class="form-input" type="number" id="item-stock" min="0" placeholder="0">
+          <label class="form-label">単位</label>
+          <input class="form-input" id="item-unit" placeholder="本・個・箱">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">1箱入数</label>
+          <input class="form-input" type="number" id="item-unit-qty" min="0" placeholder="0">
         </div>
         <div class="form-row" style="margin-bottom:0">
           <label class="form-label">必要数</label>
           <input class="form-input" type="number" id="item-required" min="0" placeholder="0">
         </div>
+      </div>
+      <div class="form-row-3" style="margin-top:12px">
         <div class="form-row" style="margin-bottom:0">
-          <label class="form-label">単位</label>
-          <input class="form-input" id="item-unit" placeholder="本・個・箱">
+          <label class="form-label">箱数</label>
+          <input class="form-input" type="number" id="item-boxes" min="0" placeholder="0">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">バラ数</label>
+          <input class="form-input" type="number" id="item-loose" min="0" placeholder="0">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">総数量（自動計算）</label>
+          <input class="form-input" id="item-stock-display" readonly style="background:var(--bg-input,#f0f0f0);color:var(--accent);font-weight:700" placeholder="—">
         </div>
       </div>
       <div class="form-row" style="margin-top:16px">
@@ -757,6 +775,18 @@ function daysLabel(expiry) {
   return `<span style="${style}">${expiry}${suffix}</span>`;
 }
 
+// 総数量 = 1箱入数 × 箱数 + バラ数
+function calcStock(item) {
+  const unitQty = Number(item.unitQty) || 0;
+  const boxes   = Number(item.boxes)   || 0;
+  const loose   = Number(item.loose)   || 0;
+  // 旧データ（stockフィールドのみ）との互換性を保つ
+  if (unitQty === 0 && boxes === 0 && loose === 0 && item.stock !== undefined) {
+    return Number(item.stock) || 0;
+  }
+  return unitQty * boxes + loose;
+}
+
 function surplusLabel(stock, required, unit) {
   if (!required && required !== 0) return '<span class="neutral">—</span>';
   const diff = (stock || 0) - (required || 0);
@@ -829,8 +859,11 @@ function updateTable() {
       <td><strong>${esc(item.name)}</strong>${item.memo ? `<br><span style="font-size:11px;color:var(--muted)">${esc(item.memo)}</span>` : ''}</td>
       <td>${esc(item.category)}</td>
       <td>${esc(item.location || '—')}</td>
-      <td>${item.stock ?? '—'} ${esc(item.unit || '')}</td>
-      <td>${surplusLabel(item.stock, item.required, item.unit)}</td>
+      <td style="text-align:right">${item.unitQty ?? '—'}</td>
+      <td style="text-align:right">${item.boxes ?? '—'}</td>
+      <td style="text-align:right">${item.loose ?? '—'}</td>
+      <td style="text-align:right;font-weight:700">${calcStock(item)} ${esc(item.unit || '')}</td>
+      <td>${surplusLabel(calcStock(item), item.required, item.unit)}</td>
       <td>${daysLabel(item.expiry)}</td>
       <td>${statusLabel(s)}</td>
       <td>
@@ -875,7 +908,10 @@ function openAdd() {
   document.getElementById('item-id').value = '';
   document.getElementById('item-name').value = '';
   document.getElementById('item-category').value = '水';
-  document.getElementById('item-stock').value = '';
+  document.getElementById('item-unit-qty').value = '';
+  document.getElementById('item-boxes').value = '';
+  document.getElementById('item-loose').value = '';
+  document.getElementById('item-stock-display').value = '';
   document.getElementById('item-required').value = '';
   document.getElementById('item-unit').value = '';
   document.getElementById('item-expiry').value = '';
@@ -891,7 +927,10 @@ function openEdit(id) {
   document.getElementById('item-id').value = item.id;
   document.getElementById('item-name').value = item.name || '';
   document.getElementById('item-category').value = item.category || '水';
-  document.getElementById('item-stock').value = item.stock ?? '';
+  document.getElementById('item-unit-qty').value = item.unitQty ?? '';
+  document.getElementById('item-boxes').value = item.boxes ?? '';
+  document.getElementById('item-loose').value = item.loose ?? '';
+  document.getElementById('item-stock-display').value = calcStock(item);
   document.getElementById('item-required').value = item.required ?? '';
   document.getElementById('item-unit').value = item.unit || '';
   document.getElementById('item-expiry').value = item.expiry || '';
@@ -913,6 +952,17 @@ function updateLocationSelect(selected) {
 
 document.getElementById('btn-add').addEventListener('click', openAdd);
 
+// 総数量のリアルタイム自動計算
+function updateStockDisplay() {
+  const unitQty = Number(document.getElementById('item-unit-qty').value) || 0;
+  const boxes   = Number(document.getElementById('item-boxes').value)   || 0;
+  const loose   = Number(document.getElementById('item-loose').value)   || 0;
+  document.getElementById('item-stock-display').value = unitQty * boxes + loose;
+}
+['item-unit-qty', 'item-boxes', 'item-loose'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateStockDisplay);
+});
+
 document.getElementById('item-save').addEventListener('click', async () => {
   const name = document.getElementById('item-name').value.trim();
   if (!name) { showToast('品名を入力してください', 'error'); return; }
@@ -923,7 +973,9 @@ document.getElementById('item-save').addEventListener('click', async () => {
     name,
     category: document.getElementById('item-category').value,
     location: document.getElementById('item-location').value,
-    stock: Number(document.getElementById('item-stock').value) || 0,
+    unitQty: Number(document.getElementById('item-unit-qty').value) || 0,
+    boxes:   Number(document.getElementById('item-boxes').value)   || 0,
+    loose:   Number(document.getElementById('item-loose').value)   || 0,
     required: Number(document.getElementById('item-required').value) || 0,
     unit: document.getElementById('item-unit').value.trim(),
     expiry: document.getElementById('item-expiry').value,
@@ -1026,12 +1078,14 @@ document.getElementById('settings-save').addEventListener('click', async () => {
 
 // ─ CSVエクスポート ────────────────────────────
 document.getElementById('btn-export').addEventListener('click', () => {
-  const headers = ['品名','カテゴリ','拠点','在庫数','必要数','単位','使用期限','状態','メモ'];
+  const headers = ['品名','カテゴリ','拠点','単位','1箱入数','箱数','バラ数','総数量','必要数','使用期限','状態','メモ'];
   const rows = data.items.map(item => {
     const s = getStatus(item.expiry);
     const stLabel = s === 'expired' ? '期限切れ' : s === 'warning' ? '要確認' : '正常';
-    return [item.name, item.category, item.location, item.stock, item.required, item.unit, item.expiry, stLabel, item.memo]
-      .map(v => `"${String(v || '').replace(/"/g, '""')}"`);
+    return [item.name, item.category, item.location, item.unit,
+            item.unitQty ?? '', item.boxes ?? '', item.loose ?? '', calcStock(item),
+            item.required, item.expiry, stLabel, item.memo]
+      .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`);
   });
   const csv = '﻿' + [headers, ...rows].map(r => r.join(',')).join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -1066,15 +1120,17 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
         name:     headers.indexOf('品名'),
         category: headers.indexOf('カテゴリ'),
         location: headers.indexOf('拠点'),
-        stock:    headers.indexOf('在庫数'),
-        required: headers.indexOf('必要数'),
         unit:     headers.indexOf('単位'),
+        unitQty:  headers.indexOf('1箱入数'),
+        boxes:    headers.indexOf('箱数'),
+        loose:    headers.indexOf('バラ数'),
+        required: headers.indexOf('必要数'),
         expiry:   headers.indexOf('使用期限'),
         memo:     headers.indexOf('メモ'),
       };
 
       if (idx.name === -1) {
-        showToast('「品名」列が見つかりません。エクスポートしたCSVを使用してください', 'error');
+        showToast('「品名」列が見つかりません', 'error');
         return;
       }
 
@@ -1086,7 +1142,6 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
         // 使用期限：YYYY-MM-DD 形式に正規化
         let expiry = idx.expiry >= 0 ? (cols[idx.expiry] || '').trim() : '';
         if (expiry && !/^\d{4}-\d{2}-\d{2}$/.test(expiry)) {
-          // YYYY/MM/DD → YYYY-MM-DD
           expiry = expiry.replace(/\//g, '-');
           if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry)) expiry = '';
         }
@@ -1096,9 +1151,11 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
           name:     (cols[idx.name] || '').trim(),
           category: idx.category >= 0 ? (cols[idx.category] || 'その他').trim() : 'その他',
           location: idx.location >= 0 ? (cols[idx.location] || data.locations[0]).trim() : data.locations[0],
-          stock:    idx.stock >= 0 ? (parseInt(cols[idx.stock]) || 0) : 0,
-          required: idx.required >= 0 ? (parseInt(cols[idx.required]) || 0) : 0,
           unit:     idx.unit >= 0 ? (cols[idx.unit] || '個').trim() : '個',
+          unitQty:  idx.unitQty >= 0 ? (parseInt(cols[idx.unitQty]) || 0) : 0,
+          boxes:    idx.boxes >= 0 ? (parseInt(cols[idx.boxes]) || 0) : 0,
+          loose:    idx.loose >= 0 ? (parseInt(cols[idx.loose]) || 0) : 0,
+          required: idx.required >= 0 ? (parseInt(cols[idx.required]) || 0) : 0,
           expiry,
           memo:     idx.memo >= 0 ? (cols[idx.memo] || '').trim() : '',
         });

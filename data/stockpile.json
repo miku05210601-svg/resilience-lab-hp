@@ -22,10 +22,12 @@
       "name": "アルファ米（白飯）",
       "category": "食料",
       "location": "本社",
-      "stock": 20,
+      "unitQty": 0,
+      "boxes": 0,
+      "loose": 0,
       "required": 30,
       "unit": "食",
-      "expiry": "2025-06-30",
+      "expiry": "2028-07-31",
       "memo": ""
     },
     {

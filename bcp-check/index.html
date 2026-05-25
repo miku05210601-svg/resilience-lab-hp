@@ -102,9 +102,9 @@
     }
     .intro-badge::before { content: '●'; font-size: 8px; }
     .intro-title {
-      font-size: clamp(19px, 3.6vw, 25px);
+      font-size: clamp(26px, 5vw, 36px);
       font-weight: 900;
-      line-height: 1.4;
+      line-height: 1.35;
       margin-bottom: 16px;
       color: var(--gray-900);
     }
@@ -583,30 +583,28 @@
   <!-- ===== イントロ ===== -->
   <section id="section-intro" class="section active">
     <div class="card">
-      <!-- ヒーローエリア：見出し左・イラスト右 -->
-      <div style="display:flex; align-items:flex-end; gap:20px; margin-bottom:28px;">
-        <div style="flex:1; min-width:0;">
-          <div class="intro-badge" style="margin-bottom:12px;">無料・約3分・登録不要</div>
-          <h1 class="intro-title" style="margin-bottom:12px;">
-            もし明日、大きな災害が起きたら、<br>
-            <em>御社の事業は続けられますか？</em>
-          </h1>
-          <p class="intro-desc">
-            その問いに答える仕組みが <strong>BCP（事業継続計画）</strong> です。<br>
-            3分間の診断で、御社の備えレベルを無料で診断します。
-          </p>
-        </div>
-        <div class="intro-illust" style="flex-shrink:0; width:160px;">
-          <img src="/bcp-check/bcp_illust.svg" alt="盾と建物のイラスト" style="width:100%; height:auto;">
+      <!-- 見出しエリア：全幅・大きく -->
+      <div class="intro-badge">無料・約3分・登録不要</div>
+      <h1 class="intro-title">
+        もし明日、大きな災害が起きたら、<br>
+        <em>御社の事業は続けられますか？</em>
+      </h1>
+      <p class="intro-desc">
+        その問いに答える仕組みが <strong>BCP（事業継続計画）</strong> です。<br>
+        3分間の診断で、御社の備えレベルを無料で診断します。
+      </p>
+
+      <!-- 痛点チェック＋イラスト：2カラム -->
+      <div style="display:flex; align-items:center; gap:24px; margin-bottom:32px;">
+        <ul class="pain-list" style="flex:1; margin-bottom:0;">
+          <li>大きな災害が起きたとき、どこから手をつければいいかわからない</li>
+          <li>万が一の備えをしたいが、何が足りているか把握できていない</li>
+          <li>経営層に「うちの会社の備えは大丈夫か」と聞かれた時に答えられない</li>
+        </ul>
+        <div class="intro-illust" style="flex-shrink:0; width:170px;">
+          <img src="/bcp-check/bcp_illust.svg" alt="災害イラスト" style="width:100%; height:auto;">
         </div>
       </div>
-
-      <!-- 痛点チェック -->
-      <ul class="pain-list">
-        <li>大きな災害が起きたとき、どこから手をつければいいかわからない</li>
-        <li>万が一の備えをしたいが、何が足りているか把握できていない</li>
-        <li>経営層に「うちの会社の備えは大丈夫か」と聞かれた時に答えられない</li>
-      </ul>
 
       <!-- 受け取れるもの -->
       <p class="benefit-title">診断を受けると、こんなレポートが届きます</p>

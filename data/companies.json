@@ -5,5 +5,12 @@
     "passwordHash": "253955ac66d967f2598b6b4d52eb60b08e431850bf6058716e37610a993c57c1",
     "tokenHash": "1072efb7fbb54af72ba009d683606fd0c0b8330dfce592d3bfca17118bc06d54",
     "created": "2026-05-24"
+  },
+  {
+    "code": "aaa",
+    "name": "AAA社",
+    "passwordHash": "56109da348e37295fcdde8b3299fde8da48c413534ab6c5670a61754b5c293e0",
+    "tokenHash": "570b48094aa27f509f481f919851ca095e847f76dbf9a90449cc1bc973c0e239",
+    "created": "2026-05-25"
   }
 ]

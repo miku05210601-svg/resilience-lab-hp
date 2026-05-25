@@ -17,7 +17,8 @@
     { "src": "bcp-check/index.html", "use": "@vercel/static" },
     { "src": "bcp-check/resilab_logo.png", "use": "@vercel/static" },
     { "src": "bcp-check/resilab_icon.png", "use": "@vercel/static" },
-    { "src": "bcp-check/bcp_illust.png", "use": "@vercel/static" }
+    { "src": "bcp-check/bcp_illust.png", "use": "@vercel/static" },
+    { "src": "bcp-check/bcp_illust.svg", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/chat", "dest": "/api/chat.js" },
@@ -39,6 +40,7 @@
     { "src": "/bcp-check/resilab_logo.png", "dest": "/bcp-check/resilab_logo.png" },
     { "src": "/bcp-check/resilab_icon.png", "dest": "/bcp-check/resilab_icon.png" },
     { "src": "/bcp-check/bcp_illust.png", "dest": "/bcp-check/bcp_illust.png" },
+    { "src": "/bcp-check/bcp_illust.svg", "dest": "/bcp-check/bcp_illust.svg" },
     { "src": "/bcp-check", "dest": "/bcp-check/index.html" },
     { "src": "/bcp-check/", "dest": "/bcp-check/index.html" },
     { "src": "/", "dest": "/index.html" }

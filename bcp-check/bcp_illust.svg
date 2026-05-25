@@ -1,54 +1,129 @@
-<svg width="200" height="228" viewBox="0 0 200 228" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="260" height="260" viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-  <!-- 盾 シャドウ -->
-  <path d="M103 17 L181 49 L181 125 Q181 179 103 216 Q25 179 25 125 L25 49 Z" fill="black" opacity="0.08"/>
+<!-- ========== 左上：地震・建物 ========== -->
+<!-- 建物本体 -->
+<rect x="22" y="22" width="58" height="72" rx="2" fill="#E8EAED" stroke="#8893A0" stroke-width="2"/>
+<!-- 庇 -->
+<rect x="18" y="20" width="66" height="6" rx="1.5" fill="#9AA5B4" stroke="#8893A0" stroke-width="1.5"/>
+<!-- 窓 3×3 -->
+<rect x="27" y="32" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<rect x="44" y="32" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<rect x="61" y="32" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<rect x="27" y="47" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<rect x="44" y="47" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<rect x="61" y="47" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<rect x="27" y="62" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<rect x="61" y="62" width="12" height="10" rx="1.5" fill="#B8D4E8"/>
+<!-- ドア -->
+<rect x="42" y="62" width="18" height="32" rx="2" fill="#7A8694"/>
+<!-- 地面 -->
+<rect x="10" y="95" width="98" height="5" rx="2" fill="#C5C9CE"/>
+<!-- 地割れ -->
+<polyline points="54,95 46,104 58,110 48,122" stroke="#555" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<!-- 揺れ線（左） -->
+<line x1="12" y1="38" x2="19" y2="44" stroke="#AAB4C0" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="11" y1="52" x2="18" y2="57" stroke="#AAB4C0" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="13" y1="66" x2="20" y2="71" stroke="#AAB4C0" stroke-width="1.8" stroke-linecap="round"/>
+<!-- 揺れ線（右） -->
+<line x1="90" y1="38" x2="97" y2="44" stroke="#AAB4C0" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="92" y1="52" x2="99" y2="57" stroke="#AAB4C0" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="91" y1="66" x2="98" y2="71" stroke="#AAB4C0" stroke-width="1.8" stroke-linecap="round"/>
+<!-- 木（左） -->
+<line x1="16" y1="85" x2="16" y2="96" stroke="#5A8A4A" stroke-width="2" stroke-linecap="round"/>
+<circle cx="16" cy="80" r="8" fill="#6AA458"/>
+<!-- 木（右） -->
+<line x1="88" y1="85" x2="88" y2="96" stroke="#5A8A4A" stroke-width="2" stroke-linecap="round"/>
+<circle cx="88" cy="80" r="7" fill="#6AA458"/>
 
-  <!-- 盾 本体 -->
-  <path d="M100 12 L178 44 L178 122 Q178 176 100 213 Q22 176 22 122 L22 44 Z" fill="#C8002D"/>
+<!-- ========== 右上：サイバーセキュリティ ========== -->
+<!-- ノートPC本体 -->
+<rect x="140" y="28" width="80" height="52" rx="4" fill="#C8CDD8" stroke="#8090A0" stroke-width="2"/>
+<!-- 画面 -->
+<rect x="146" y="33" width="68" height="42" rx="2" fill="#A8C8E8"/>
+<!-- 画面の錠前 -->
+<rect x="171" y="46" width="18" height="14" rx="2" fill="#2A5890"/>
+<path d="M175 46 L175 42 Q180 37 185 42 L185 46" stroke="#2A5890" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<circle cx="180" cy="52" r="2.2" fill="white"/>
+<line x1="180" y1="53" x2="180" y2="57" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+<!-- PC台座 -->
+<rect x="132" y="80" width="96" height="7" rx="3.5" fill="#A8B0C0" stroke="#8090A0" stroke-width="1.5"/>
+<!-- 盾 -->
+<path d="M214 50 L230 56 L230 70 Q230 83 214 89 Q198 83 198 70 L198 56 Z" fill="#2A5890"/>
+<path d="M214 56 L228 61 L228 70 Q228 81 214 86 Q200 81 200 70 L200 61 Z" fill="#3A6EB0" opacity="0.5"/>
+<!-- 盾の錠前 -->
+<rect x="208" y="68" width="12" height="10" rx="1.5" fill="white"/>
+<path d="M211 68 L211 65 Q214 62 217 65 L217 68" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<circle cx="214" cy="72" r="1.8" fill="#2A5890"/>
+<!-- 輝き線 -->
+<line x1="234" y1="56" x2="238" y2="52" stroke="#6A9FD0" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="236" y1="65" x2="241" y2="65" stroke="#6A9FD0" stroke-width="1.8" stroke-linecap="round"/>
+<line x1="234" y1="74" x2="238" y2="78" stroke="#6A9FD0" stroke-width="1.8" stroke-linecap="round"/>
 
-  <!-- 盾 左上ハイライト -->
-  <path d="M100 12 L22 44 L22 88 Q32 58 62 38 Z" fill="white" opacity="0.07"/>
+<!-- ========== 左下：ウイルス ========== -->
+<!-- メインウイルス -->
+<circle cx="58" cy="182" r="28" fill="#7060B0"/>
+<!-- スパイク（8方向） -->
+<g fill="#7060B0">
+  <circle cx="58"  cy="147" r="5.5"/>
+  <circle cx="82"  cy="154" r="4.5"/>
+  <circle cx="91"  cy="178" r="4.5"/>
+  <circle cx="83"  cy="202" r="4.5"/>
+  <circle cx="58"  cy="217" r="5"/>
+  <circle cx="33"  cy="206" r="4.5"/>
+  <circle cx="23"  cy="182" r="4.5"/>
+  <circle cx="31"  cy="157" r="4.5"/>
+</g>
+<g stroke="#7060B0" stroke-width="3" stroke-linecap="round">
+  <line x1="58"  y1="154" x2="58"  y2="162"/>
+  <line x1="79"  y1="158" x2="74"  y2="165"/>
+  <line x1="87"  y1="178" x2="80"  y2="178"/>
+  <line x1="80"  y1="198" x2="75"  y2="194"/>
+  <line x1="58"  y1="210" x2="58"  y2="203"/>
+  <line x1="36"  y1="200" x2="41"  y2="196"/>
+  <line x1="27"  y1="182" x2="34"  y2="182"/>
+  <line x1="34"  y1="161" x2="40"  y2="166"/>
+</g>
+<!-- ウイルス表面の斑点 -->
+<circle cx="52"  cy="174" r="5.5" fill="#907AB8"/>
+<circle cx="68"  cy="185" r="4.5" fill="#907AB8"/>
+<circle cx="57"  cy="191" r="3.5" fill="#8070A8"/>
+<!-- 小ウイルス（右上） -->
+<circle cx="100" cy="148" r="10" fill="#9080C0"/>
+<circle cx="100" cy="135" r="3"  fill="#9080C0"/>
+<circle cx="113" cy="148" r="3"  fill="#9080C0"/>
+<circle cx="100" cy="161" r="3"  fill="#9080C0"/>
+<circle cx="87"  cy="148" r="3"  fill="#9080C0"/>
+<g stroke="#9080C0" stroke-width="2" stroke-linecap="round">
+  <line x1="100" y1="138" x2="100" y2="142"/>
+  <line x1="110" y1="148" x2="106" y2="148"/>
+  <line x1="100" y1="158" x2="100" y2="154"/>
+  <line x1="90"  y1="148" x2="94"  y2="148"/>
+</g>
+<!-- 極小ウイルス -->
+<circle cx="18"  cy="208" r="6"   fill="#A898D0"/>
+<circle cx="18"  cy="200" r="2"   fill="#A898D0"/>
+<circle cx="26"  cy="208" r="2"   fill="#A898D0"/>
 
-  <!-- ビル：スパイア（最上部） -->
-  <rect x="93" y="57" width="14" height="25" rx="2" fill="white"/>
-  <!-- スパイア根元の庇 -->
-  <rect x="87" y="80" width="26" height="5" rx="2" fill="white"/>
-
-  <!-- ビル：上層ブロック -->
-  <rect x="78" y="83" width="44" height="30" rx="2" fill="white"/>
-
-  <!-- ビル：中間庇 -->
-  <rect x="70" y="111" width="60" height="5" rx="2" fill="white"/>
-
-  <!-- ビル：メインブロック -->
-  <rect x="72" y="114" width="56" height="60" rx="2" fill="white"/>
-
-  <!-- 窓 上層ブロック（水色） -->
-  <rect x="84" y="88"  width="8" height="7" rx="1" fill="#B8CEE0"/>
-  <rect x="96" y="88"  width="8" height="7" rx="1" fill="#B8CEE0"/>
-  <rect x="108" y="88" width="8" height="7" rx="1" fill="#B8CEE0"/>
-  <rect x="84" y="100" width="8" height="7" rx="1" fill="#B8CEE0"/>
-  <rect x="108" y="100" width="8" height="7" rx="1" fill="#B8CEE0"/>
-
-  <!-- 窓 メインブロック 1段目 -->
-  <rect x="80"  y="122" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-  <rect x="95"  y="122" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-  <rect x="110" y="122" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-
-  <!-- 窓 メインブロック 2段目 -->
-  <rect x="80"  y="137" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-  <rect x="95"  y="137" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-  <rect x="110" y="137" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-
-  <!-- 窓 メインブロック 3段目（中央はドア） -->
-  <rect x="80"  y="152" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-  <rect x="110" y="152" width="11" height="9" rx="1.5" fill="#B8CEE0"/>
-
-  <!-- ドア -->
-  <rect x="91" y="151" width="18" height="23" rx="2" fill="#D4E4F0"/>
-  <circle cx="105" cy="163" r="1.8" fill="#9BBDD4"/>
-
-  <!-- 地面ライン -->
-  <rect x="58" y="174" width="84" height="3" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+<!-- ========== 右下：大雨・水害 ========== -->
+<!-- 雲（メイン） -->
+<circle cx="168" cy="152" r="22" fill="#B4BCC8"/>
+<circle cx="186" cy="149" r="19" fill="#B4BCC8"/>
+<circle cx="202" cy="155" r="16" fill="#B4BCC8"/>
+<circle cx="155" cy="158" r="15" fill="#B4BCC8"/>
+<rect   x="142"  y="157" width="75" height="18" fill="#B4BCC8"/>
+<!-- 雲ハイライト -->
+<circle cx="168" cy="152" r="18" fill="#CDD4DE" opacity="0.45"/>
+<circle cx="184" cy="149" r="14" fill="#CDD4DE" opacity="0.3"/>
+<!-- 雨粒（1段目） -->
+<line x1="152" y1="183" x2="148" y2="198" stroke="#5A90C8" stroke-width="2.8" stroke-linecap="round"/>
+<line x1="163" y1="186" x2="159" y2="201" stroke="#5A90C8" stroke-width="2.8" stroke-linecap="round"/>
+<line x1="174" y1="183" x2="170" y2="198" stroke="#5A90C8" stroke-width="2.8" stroke-linecap="round"/>
+<line x1="185" y1="186" x2="181" y2="201" stroke="#5A90C8" stroke-width="2.8" stroke-linecap="round"/>
+<line x1="196" y1="183" x2="192" y2="198" stroke="#5A90C8" stroke-width="2.8" stroke-linecap="round"/>
+<!-- 雨粒（2段目） -->
+<line x1="157" y1="203" x2="153" y2="217" stroke="#5A90C8" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="168" y1="206" x2="164" y2="220" stroke="#5A90C8" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="179" y1="203" x2="175" y2="217" stroke="#5A90C8" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="190" y1="206" x2="186" y2="220" stroke="#5A90C8" stroke-width="2.2" stroke-linecap="round"/>
 
 </svg>

@@ -384,7 +384,7 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, 
             <span style="font-size:12px; color:#999;">（ご訪問は東京・神奈川・千葉・埼玉に限ります。ご了承ください。）</span><br><br>
             まずは他社の状況や改善アイディアなど、ざっくばらんな情報共有を前提に、お気軽にご連絡ください。
           </p>
-          <a href="mailto:info@resilab-jpn.com?subject=BCP診断後のご相談（${encodeURIComponent(company)}）&body=BCP診断レポートを拝見しました。詳しいご説明をお願いいたします。" style="display:inline-block; background:#C8002D; color:white; padding:14px 36px; border-radius:8px; font-weight:bold; font-size:15px; text-decoration:none; margin-bottom:12px;">無料相談を申し込む →</a>
+          <a href="mailto:info@resilab-jpn.com?subject=${encodeURIComponent('BCP診断後のご相談（' + company + '様）')}&body=${encodeURIComponent('BCP診断を実施しました。詳細について、説明してください。\n\n■希望日時（複数ご提示ください）\n\n\n■希望形式：オンライン／対面\n（対面の場合は場所をお知らせください）')}" style="display:inline-block; background:#C8002D; color:white; padding:14px 36px; border-radius:8px; font-weight:bold; font-size:15px; text-decoration:none; margin-bottom:12px;">無料相談を申し込む →</a>
           <p style="color:#666; font-size:12px; margin:0;">平日9:00〜17:00 ／ info@resilab-jpn.com</p>
         </div>
 

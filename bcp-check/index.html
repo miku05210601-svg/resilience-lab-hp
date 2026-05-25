@@ -79,6 +79,8 @@
     }
     @media (max-width: 480px) {
       .card { padding: 32px 20px; }
+      /* モバイルではイラストを小さく */
+      .intro-illust { width: 100px !important; }
     }
 
     /* セクション表示制御 */
@@ -581,18 +583,23 @@
   <!-- ===== イントロ ===== -->
   <section id="section-intro" class="section active">
     <div class="card">
-      <div style="text-align:center; margin-bottom:20px;">
-        <img src="/bcp-check/bcp_illust.png" alt="災害・感染症・サイバー攻撃のイラスト" style="width:min(280px, 75%); height:auto;">
+      <!-- ヒーローエリア：見出し左・イラスト右 -->
+      <div style="display:flex; align-items:center; gap:24px; margin-bottom:28px;">
+        <div style="flex:1; min-width:0;">
+          <div class="intro-badge" style="margin-bottom:12px;">無料・約3分・登録不要</div>
+          <h1 class="intro-title" style="margin-bottom:12px;">
+            もし明日、大きな災害が起きたら、<br>
+            <em>御社の事業は続けられますか？</em>
+          </h1>
+          <p class="intro-desc">
+            その問いに答える仕組みが <strong>BCP（事業継続計画）</strong> です。<br>
+            3分間の診断で、御社の備えレベルを無料で診断します。
+          </p>
+        </div>
+        <div class="intro-illust" style="flex-shrink:0; width:140px;">
+          <img src="/bcp-check/bcp_illust.png" alt="災害・感染症・サイバー攻撃のイラスト" style="width:100%; height:auto; opacity:0.9;">
+        </div>
       </div>
-      <div class="intro-badge">無料・約3分・登録不要</div>
-      <h1 class="intro-title">
-        もし明日、大きな災害が起きたら、<br>
-        <em>御社の事業は続けられますか？</em>
-      </h1>
-      <p class="intro-desc">
-        その問いに答える仕組みが <strong>BCP（事業継続計画）</strong> です。<br>
-        3分間の診断で、御社の備えレベルを無料で診断します。
-      </p>
 
       <!-- 痛点チェック -->
       <ul class="pain-list">
@@ -715,6 +722,14 @@
         <div class="result-score-label">点 / 100点</div>
         <div id="level-badge" class="level-badge"></div>
         <p id="level-desc" class="level-desc"></p>
+
+        <!-- スコア直下CTA（折り返し前・スクロール不要） -->
+        <div style="margin-top:8px;">
+          <button onclick="showContact()" style="background:var(--red); color:white; border:none; border-radius:8px; padding:14px 28px; font-size:15px; font-weight:bold; cursor:pointer; width:100%; max-width:360px;">
+            📩 詳細レポートを無料で受け取る →
+          </button>
+          <p style="font-size:11px; color:var(--gray-500); margin-top:8px;">メールアドレスを入力するだけ・完全無料</p>
+        </div>
       </div>
 
       <!-- テザー：チャートと領域別スコアはメール受け取り後に公開 -->

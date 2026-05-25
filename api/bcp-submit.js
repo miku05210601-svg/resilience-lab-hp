@@ -1,5 +1,4 @@
 const { Resend } = require('resend');
-const Anthropic = require('@anthropic-ai/sdk');
 
 // Googleスプレッドシートに診断データを記録
 async function saveToSheet(data) {
@@ -17,10 +16,11 @@ async function saveToSheet(data) {
 }
 
 const CATEGORIES = [
-  'BCPの策定状況',
-  'リスク認識・評価',
-  '組織・体制',
-  'IT・情報管理',
+  '経営・体制',
+  'リスク認識',
+  '重要業務・連絡体制',
+  '設備・物理対策',
+  'IT・データ',
   'サプライチェーン',
   '訓練・維持管理',
 ];
@@ -118,61 +118,78 @@ function calcLossScenarios(revenueMillion, totalScore) {
   });
 }
 
-// Claude APIで改善提案レポートを生成
-async function generateReport({ company, size, industry, totalScore, level, catPcts, lossScenarios, revenueInfo }) {
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// パターンベースで改善提案レポートを生成（Claude API 不使用・同期処理）
+function generateReport({ company, totalScore, level, catPcts }) {
+  const lLetter = level?.match(/[ABCD]/)?.[0] ?? 'D';
 
-  const domainList = CATEGORIES
-    .map((cat, i) => `・${cat}: ${catPcts?.[i] ?? 0}点 / 100点`)
-    .join('\n');
+  // レベル別 総評
+  const SUMMARIES = {
+    A: `${company}様のBCP対策は非常に高い水準にあります。7つの領域にわたり組織的な備えができており、業界でもトップクラスの対策レベルといえます。この優れた取り組みを維持しながら、さらなる高度化・実効性向上を目指していきましょう。`,
+    B: `${company}様のBCP対策は良好な水準にあります。基本的な取り組みは整っていますが、一部の領域にさらなる強化の余地があります。重点領域への取り組みを加速させることで、より実効性の高い体制が実現できます。`,
+    C: `${company}様のBCP対策は現在改善の途上にあります。診断により課題のある領域が明確になりました。優先順位をつけて一つずつ対策を進めていくことで、確実にレベルアップできます。多くの企業がこの段階から本格的な取り組みを始めています。`,
+    D: `${company}様のBCPはこれから整備していく段階にあります。まず現状を正確に把握できたことが最初の一歩です。ゼロから始める企業ほど対策の効果が大きく出ます。優先度の高いことから着実に進めていきましょう。`,
+  };
 
-  const lossContext = lossScenarios ? `
-【リスクシナリオ別 損失試算（推計）】
-${lossScenarios.map(s => `・${s.name}：財務的損失 ${s.financialLoss}（事業停止期間 ${s.stopDays}）`).join('\n')}
-※推計年商 約${revenueInfo.value >= 10000 ? (revenueInfo.value/10000).toFixed(1)+'億円' : revenueInfo.value+'百万円'}（${revenueInfo.isInput ? '入力値' : '従業員数・業種から推計'}）をベースに算出。BCPなし・対策不十分な場合の参考値。` : '';
+  // レベル別 締めメッセージ
+  const CLOSINGS = {
+    A: `高い水準のBCP対策を維持されていることは、企業の信頼性向上にも直結します。レジリエンスラボは、さらなる高度化に向けてともに歩んでまいります。`,
+    B: `BCPの整備は着実に進んでいます。あと一歩の強化で、より実効性の高い体制が整います。レジリエンスラボが全力でサポートいたします。`,
+    C: `BCPの整備に取り組む姿勢そのものが、企業の強さになります。一つひとつ確実に進めていきましょう。レジリエンスラボがしっかりとサポートいたします。`,
+    D: `まず現状を知ることから始めることが大切です。今日の診断がその第一歩です。レジリエンスラボが伴走しながらサポートいたします。`,
+  };
 
-  const msg = await anthropic.messages.create({
-    model: 'claude-opus-4-7',
-    max_tokens: 1600,
-    messages: [{
-      role: 'user',
-      content: `あなたは株式会社レジリエンスラボの防災・BCP専門コンサルタントです。
-以下の企業のBCP簡易診断結果をもとに、具体的で実践的な改善提案レポートを日本語で作成してください。
+  // カテゴリ別アクションパターン（低/中/高 スコア対応）
+  const ACTION_PATTERNS = [
+    // 0: 経営・体制
+    { low: '防災・事業継続の担当者を指名し、経営会議で推進を正式に宣言する', mid: '経営層向けの事業継続説明資料を作成し、次回役員会で方針を承認してもらう', high: '年1回の方針レビューを経営カレンダーに組み込む' },
+    // 1: リスク認識
+    { low: '自社事業所のハザードマップを確認し、想定リスクを箇条書きで整理する', mid: 'リスクを「発生確率×影響度」で評価し、対策の優先順位を決める', high: '年1回のリスク棚卸しを定例化し、新たなリスクを見直す' },
+    // 2: 重要業務・連絡体制
+    { low: '緊急連絡先リスト（全社員・主要取引先）を作成し担当者に共有する', mid: '災害時に継続すべき最重要業務（上位3つ）と業務再開の目標期日を設定する', high: '緊急連絡先リストを半期ごとに更新する仕組みをつくる' },
+    // 3: 設備・物理対策
+    { low: '社員3日分の飲料水・非常食を調達し、保管場所を決める', mid: '備蓄品リストを整備し、停電対策（蓄電池・ポータブル電源・無停電電源装置等）の検討を始める', high: '備蓄品の補充・点検を年1回の定例作業に組み込む。備蓄品の配布や運用を計画・訓練する' },
+    // 4: IT・データ
+    { low: '重要データのクラウドバックアップを設定する', mid: 'バックアップからの復旧テストを実施し、手順書を作成する', high: 'システム停止時の代替手順を文書化し全員に周知する' },
+    // 5: サプライチェーン
+    { low: '主要取引先（上位5社）の連絡先と代替候補をリスト化する', mid: '重要仕入先の事業継続状況を確認し、連携体制を整える', high: '代替調達先との基本契約・優先交渉権の確保を進める' },
+    // 6: 訓練・維持管理
+    { low: '全社員向けの研修を実施し、災害対応の基本知識を共有する', mid: '年1回の災害対策本部訓練＋研修を組み合わせた実践プログラムを企画・実施する', high: '訓練・研修の振り返りを記録し、毎回内容を改善するサイクルをつくる' },
+  ];
 
-【企業情報】
-会社名: ${company}
-業種: ${industry || '不明'}
-従業員数: ${size || '不明'}
-
-【診断結果】
-総合スコア: ${totalScore}点 / 100点
-総合レベル: ${level}
-
-【領域別スコア】
-${domainList}
-${lossContext}
-
-【重要な注意】
-総合スコアが80点以上（レベルA・優良）の場合は、改善ではなく「さらなる高みへの発展・維持」の観点で提案してください。弱点を指摘するのではなく、現状を称えつつ、BCPの高度化・組織強化・業界リーダーとしての姿勢を提案する内容にしてください。
-
-以下の形式のJSONのみを返してください（前後に説明文は不要）：
-{
-  "summary": "総評（3〜4文。会社名を入れてパーソナライズ。現状を正直に、かつ前向きに。レベルAなら高い水準を称える）",
-  "strengths": ["強みの領域と簡単なコメント（スコア60点以上の領域。最大2つ。なければ空配列）"],
-  "weakPoints": [
-    {"area": "領域名またはテーマ", "comment": "課題または発展のポイント（レベルAなら高度化・維持の観点で）", "action": "具体的なアクション1文"}
-  ],
-  "top3Actions": [
-    "最優先アクション（具体的に。レベルAなら高度化・維持の観点で）",
-    "2番目のアクション（具体的に）",
-    "3番目のアクション（具体的に）"
-  ],
-  "closing": "前向きな締めのメッセージ（2文。レジリエンスラボとしてサポートする意欲を示す）"
-}`,
-    }],
+  // 各カテゴリの現在スコアに応じたアクションを取得
+  const catActions = ACTION_PATTERNS.map((p, i) => {
+    const pct = catPcts?.[i] ?? 0;
+    const action = pct >= 70 ? p.high : pct >= 40 ? p.mid : p.low;
+    return { cat: i, name: CATEGORIES[i], pct, action };
   });
 
-  return JSON.parse(msg.content[0].text);
+  // スコアが低い順にソートし、上位3つを優先アクションとして抽出
+  const sortedByScore = [...catActions].sort((a, b) => a.pct - b.pct);
+  const top3Actions = sortedByScore.slice(0, 3).map(c => `【${c.name}】${c.action}`);
+
+  // 強み（70点以上、最大2つ）
+  const strengths = catActions
+    .filter(c => c.pct >= 70)
+    .map(c => `${c.name}（${c.pct}点）：この領域の取り組みは高い水準にあります。`)
+    .slice(0, 2);
+
+  // 優先改善領域（70点未満、最大3つ）
+  const weakPoints = sortedByScore
+    .filter(c => c.pct < 70)
+    .slice(0, 3)
+    .map(c => ({
+      area: c.name,
+      comment: c.pct < 40 ? 'この領域は早急な対応が必要です。' : 'さらなる改善の余地があります。',
+      action: ACTION_PATTERNS[c.cat][c.pct >= 40 ? 'mid' : 'low'],
+    }));
+
+  return {
+    summary: SUMMARIES[lLetter] ?? SUMMARIES.D,
+    strengths,
+    weakPoints,
+    top3Actions,
+    closing: CLOSINGS[lLetter] ?? CLOSINGS.D,
+  };
 }
 
 // 顧客向けHTMLメール本文を生成
@@ -216,13 +233,20 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, 
   const lLetter = level?.match(/[ABCD]/)?.[0] ?? 'D';
   const isTopLevel = lLetter === 'A';
 
+  // ※ cat4（IT・データ）はパートナー対応のため非表示
   const IMPROVE_SERVICES = [
-    { cat: 0, name: 'BCP策定支援', icon: '📋', desc: 'BCPの文書化から体制構築まで、専門コンサルタントが伴走してゼロからサポートします。' },
-    { cat: 1, name: 'リスク評価・詳細診断', icon: '🔍', desc: '自社のリスク洗い出しから重要業務・目標復旧時間の特定まで、現場に即した詳細診断を実施します。' },
-    { cat: 2, name: '階層別BCP研修', icon: '🎓', desc: '経営層・管理職・全社員向けに、自社の課題に合わせたカスタム研修プログラムを提供します。' },
-    { cat: 3, name: 'IT-BCP支援', icon: '💻', desc: 'データバックアップ体制の見直しからシステム復旧計画の策定まで、IT面の事業継続を支援します。' },
-    { cat: 4, name: 'サプライチェーンBCP支援', icon: '🔗', desc: '重要取引先のBCP状況調査から代替調達先の確保まで、サプライチェーン視点で支援します。' },
-    { cat: 5, name: '訓練・シミュレーション演習', icon: '🏃', desc: '災害対策本部訓練・安否確認訓練など、BCPを机上から実践レベルに引き上げる演習を実施します。' },
+    { cat: 0, name: 'BCP体制づくり支援', icon: '📋',
+      desc: '誰が何をするかを決めるところから、専門コンサルタントが伴走してサポートします。' },
+    { cat: 1, name: 'リスク評価・詳細診断', icon: '🔍',
+      desc: '自社に潜むリスクを洗い出し、どのリスクから優先的に対応すべきかを明確にします。' },
+    { cat: 2, name: '社員向けBCP教育・研修', icon: '🎓',
+      desc: '「BCPって何？」という段階から、経営層・管理職・全社員それぞれのレベルに合わせた研修を提供します。' },
+    { cat: 3, name: '設備・備蓄対策支援', icon: '🏗️',
+      desc: '備蓄品の整備計画から、停電・断水時の業務継続対策まで、物理的な備えを専門家が支援します。' },
+    { cat: 5, name: '取引先との連携強化支援', icon: '🔗',
+      desc: '主要な仕入先・取引先の事業継続状況を確認し、万が一の際の代替調達先確保を支援します。' },
+    { cat: 6, name: '防災訓練・シミュレーション演習', icon: '🏃',
+      desc: '安否確認訓練・災害対応演習など、学んだことを実際の行動に落とし込む実践的プログラムを提供します。' },
   ];
 
   const ADVANCED_SERVICES = [
@@ -440,20 +464,8 @@ module.exports = async (req, res) => {
   // Resend API クライアントを初期化
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  // AIレポート生成
-  let report;
-  try {
-    report = await generateReport({ company, size, industry, totalScore, level, catPcts, lossScenarios, revenueInfo });
-  } catch (err) {
-    console.error('Claude APIエラー:', err);
-    report = {
-      summary: `${company}様のBCP診断結果をお届けします。総合スコアは${totalScore}点（${level}）でした。詳細な改善提案については、弊社担当者よりご連絡いたします。`,
-      strengths: [],
-      weakPoints: [],
-      top3Actions: ['BCPの担当者・責任者を明確にする', '安否確認の仕組みを整備する', '重要業務とその目標復旧時間（RTO）を設定する'],
-      closing: 'BCPの整備は一歩一歩の積み重ねです。レジリエンスラボがしっかりとサポートいたします。お気軽にご相談ください。',
-    };
-  }
+  // パターンベースでレポート生成（同期処理・高速）
+  const report = generateReport({ company, totalScore, level, catPcts });
 
   const errors = [];
 
@@ -478,7 +490,7 @@ module.exports = async (req, res) => {
   try {
     await resend.emails.send({
       from: 'BCP診断ツール <report-noreply@resilab-jpn.com>',
-      to: 'miku0521@hotmail.co.jp', // ⚠️ テスト中 — 本番に戻す前に process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com' に変更
+      to: process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com',
       subject: `【新規リード】${company} 様 — スコア${totalScore}点（${level}）`,
       text: buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }),
     });

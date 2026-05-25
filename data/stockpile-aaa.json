@@ -1,0 +1,22 @@
+{
+  "contacts": [],
+  "locations": [
+    "本社"
+  ],
+  "alertDays": 90,
+  "items": [
+    {
+      "id": "d5006d74-936e-4457-bfa6-90ca3455506e",
+      "name": "ミネラルウォーター２L",
+      "category": "水",
+      "location": "本社",
+      "unitQty": 8,
+      "boxes": 10,
+      "loose": 0,
+      "required": 0,
+      "unit": "本",
+      "expiry": "2030-12-25",
+      "memo": ""
+    }
+  ]
+}

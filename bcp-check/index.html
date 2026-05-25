@@ -821,18 +821,19 @@
   <section id="section-thankyou" class="section">
     <div class="card">
       <div class="thankyou-icon">✅</div>
-      <h2 class="thankyou-title">送信が完了しました</h2>
+      <h2 class="thankyou-title">ありがとうございます！</h2>
       <p class="thankyou-desc">
-        ご回答いただきありがとうございます。<br>
-        営業日3日以内に、<strong>詳細な診断レポートと改善提案</strong>をメールにてお送りします。
+        診断レポートを自動作成しています。<br>
+        <strong>数分以内に、入力いただいたメールアドレスへお届けします。</strong><br>
+        <span style="font-size:13px; color:var(--gray-500);">届かない場合は迷惑メールフォルダもご確認ください。</span>
       </p>
       <div class="thankyou-box">
-        <p style="font-weight:700; margin-bottom:10px;">📋 送付予定の内容</p>
+        <p style="font-weight:700; margin-bottom:10px;">📋 レポートに含まれる内容</p>
         <ul>
-          <li>BCP診断スコア（領域別・総合）</li>
+          <li>7領域の診断スコアと強み・弱みの分析</li>
+          <li>今すぐ取り組むべき優先アクション TOP3</li>
+          <li>被災した場合の損失シミュレーション</li>
           <li>課題領域の改善提案</li>
-          <li>貴社業種に合ったBCP強化ポイント</li>
-          <li>弊社サービスのご案内（ご希望の場合）</li>
         </ul>
       </div>
       <a href="https://resilab-jpn.com/" class="btn btn-secondary" style="width:100%; text-align:center;" target="_blank">
@@ -1300,10 +1301,10 @@ async function submitForm(e) {
   }
   if (!valid) return;
 
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = true;
-  btn.textContent = '送信中…';
+  // バリデーション通過 → 即座にサンキューページを表示（待たせない）
+  showSection('section-thankyou');
 
+  // バックグラウンドでメール・記録を処理（ノンブロッキング）
   const result = window._bcpResult || {};
   const payload = {
     company,
@@ -1322,19 +1323,14 @@ async function submitForm(e) {
     submittedAt: new Date().toISOString(),
   };
 
-  try {
-    const res = await fetch('/api/bcp-submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error('送信失敗');
-    showSection('section-thankyou');
-  } catch {
-    btn.disabled = false;
-    btn.textContent = '送信して結果レポートを受け取る →';
-    alert('送信に失敗しました。お手数ですが contact@resilience-lab.co.jp までご連絡ください。');
-  }
+  fetch('/api/bcp-submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(err => {
+    // バックグラウンドエラーはコンソールに記録（UXには影響させない）
+    console.error('レポート送信エラー:', err);
+  });
 }
 </script>
 </body>

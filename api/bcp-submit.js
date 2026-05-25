@@ -280,8 +280,8 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, 
     <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
 
       <!-- ヘッダー -->
-      <tr><td style="background:#C8002D; padding:24px 32px; border-radius:12px 12px 0 0;">
-        <p style="color:white; font-size:12px; margin:0 0 4px; opacity:0.8;">株式会社レジリエンスラボ</p>
+      <tr><td style="background:#C8002D; padding:20px 32px 16px; border-radius:12px 12px 0 0;">
+        <img src="https://resilience-lab-hp.vercel.app/bcp-check/resilab_logo.png" alt="レジリエンスラボ" style="height:32px; width:auto; filter:brightness(0) invert(1); margin-bottom:10px; display:block;">
         <p style="color:white; font-size:20px; font-weight:bold; margin:0;">BCP簡易診断レポート</p>
       </td></tr>
 
@@ -384,8 +384,8 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, 
             <span style="font-size:12px; color:#999;">（ご訪問は東京・神奈川・千葉・埼玉に限ります。ご了承ください。）</span><br><br>
             まずは他社の状況や改善アイディアなど、ざっくばらんな情報共有を前提に、お気軽にご連絡ください。
           </p>
-          <a href="mailto:contact@resilience-lab.co.jp?subject=BCP診断後のご相談（${encodeURIComponent(company)}）&body=BCP診断レポートを拝見しました。詳しいご説明をお願いいたします。" style="display:inline-block; background:#C8002D; color:white; padding:14px 36px; border-radius:8px; font-weight:bold; font-size:15px; text-decoration:none; margin-bottom:12px;">無料相談を申し込む →</a>
-          <p style="color:#666; font-size:12px; margin:0;">平日9:00〜17:00 ／ contact@resilience-lab.co.jp</p>
+          <a href="mailto:info@resilab-jpn.com?subject=BCP診断後のご相談（${encodeURIComponent(company)}）&body=BCP診断レポートを拝見しました。詳しいご説明をお願いいたします。" style="display:inline-block; background:#C8002D; color:white; padding:14px 36px; border-radius:8px; font-weight:bold; font-size:15px; text-decoration:none; margin-bottom:12px;">無料相談を申し込む →</a>
+          <p style="color:#666; font-size:12px; margin:0;">平日9:00〜17:00 ／ info@resilab-jpn.com</p>
         </div>
 
         <!-- 免責・コンプライアンス注記 -->
@@ -476,6 +476,7 @@ module.exports = async (req, res) => {
     customerMailResult = await resend.emails.send({
       from: 'レジリエンスラボ BCP診断 <report-noreply@resilab-jpn.com>',
       to: email,
+      bcc: 'mitou@resilab-jpn.com',
       subject: `【BCP診断レポート】${company}様 — 総合スコア${totalScore}点（${level}）`,
       html,
     });

@@ -460,11 +460,12 @@ tr.row-warning td { background: #fffdf0; }
   <div class="login-card">
     <div class="login-logo">🏢</div>
     <div class="login-title">備蓄品管理</div>
-    <div class="login-sub">レジリエンスラボ 社内ツール</div>
+    <div class="login-sub">会社IDとパスワードを入力してください</div>
     <form class="login-form" id="login-form">
-      <input type="password" id="login-password" placeholder="パスワードを入力" autocomplete="current-password">
+      <input type="text" id="login-company-id" placeholder="会社ID" autocomplete="username" autocapitalize="none">
+      <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
       <button type="submit">ログイン</button>
-      <div class="login-error" id="login-error">パスワードが違います</div>
+      <div class="login-error" id="login-error">会社IDまたはパスワードが違います</div>
     </form>
   </div>
 </div>
@@ -673,13 +674,16 @@ tr.row-warning td { background: #fffdf0; }
 // ─ 状態管理 ─────────────────────────────────
 // URLから会社コードを取得（/stockpile/abc-company → 'abc-company'）
 const pathParts = window.location.pathname.split('/').filter(Boolean);
-const companyCode = pathParts[1] || '';  // /stockpile/[code]
+const urlCompanyCode = pathParts[1] || '';
 
-// 会社コードがある場合は会社別APIを使用、ない場合は旧APIを使用
-const API_LOGIN  = companyCode ? `/api/stockpile/${companyCode}/login`     : '/api/stockpile/login';
-const API_DATA   = companyCode ? `/api/stockpile/${companyCode}/data`       : '/api/stockpile/data';
-const API_ALERT  = companyCode ? `/api/stockpile/${companyCode}/send-alert` : '/api/stockpile/send-alert';
-const TOKEN_KEY  = companyCode ? `stockpile_token_${companyCode}`           : 'stockpile_token';
+// ログイン済みの場合はsessionStorageから会社コードを復元、なければURLのコードを使用
+let companyCode = sessionStorage.getItem('stockpile_company') || urlCompanyCode;
+
+// 会社コードがある場合は会社別APIを使用（let: ログイン時に再設定）
+let API_LOGIN  = companyCode ? `/api/stockpile/${companyCode}/login`     : '/api/stockpile/login';
+let API_DATA   = companyCode ? `/api/stockpile/${companyCode}/data`       : '/api/stockpile/data';
+let API_ALERT  = companyCode ? `/api/stockpile/${companyCode}/send-alert` : '/api/stockpile/send-alert';
+let TOKEN_KEY  = companyCode ? `stockpile_token_${companyCode}`           : 'stockpile_token';
 
 let token = sessionStorage.getItem(TOKEN_KEY) || '';
 let data = { contacts: [], locations: ['本社'], alertDays: 90, items: [] };
@@ -704,6 +708,11 @@ async function api(method, path, body) {
 
 // ─ 初期化 ────────────────────────────────────
 async function init() {
+  // URLに会社コードがある場合、ログイン画面のIDフィールドに自動入力
+  if (urlCompanyCode) {
+    document.getElementById('login-company-id').value = urlCompanyCode;
+  }
+
   // 会社コードがある場合、会社名をタイトルに表示
   if (companyCode) {
     document.title = `備蓄品管理 | ${companyCode}`;
@@ -715,6 +724,7 @@ async function init() {
       showMain();
     } catch {
       sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem('stockpile_company');
       token = '';
       showLogin();
     }
@@ -737,26 +747,44 @@ function showMain() {
 // ─ ログイン ──────────────────────────────────
 document.getElementById('login-form').addEventListener('submit', async e => {
   e.preventDefault();
+  const enteredId = document.getElementById('login-company-id').value.trim();
   const pw = document.getElementById('login-password').value;
   const err = document.getElementById('login-error');
   err.style.display = 'none';
+
+  // 会社ID未入力チェック
+  if (!enteredId) {
+    err.textContent = '会社IDを入力してください';
+    err.style.display = 'block';
+    return;
+  }
+
+  // 入力された会社IDでAPI URLを確定
+  companyCode = enteredId;
+  API_LOGIN = `/api/stockpile/${companyCode}/login`;
+  API_DATA  = `/api/stockpile/${companyCode}/data`;
+  API_ALERT = `/api/stockpile/${companyCode}/send-alert`;
+  TOKEN_KEY = `stockpile_token_${companyCode}`;
+
   try {
     const res = await fetch(API_LOGIN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: pw }),
     });
-    if (!res.ok) { err.style.display = 'block'; return; }
+    if (!res.ok) {
+      err.textContent = '会社IDまたはパスワードが違います';
+      err.style.display = 'block';
+      return;
+    }
     const json = await res.json();
     token = json.token;
     sessionStorage.setItem(TOKEN_KEY, token);
-    // 会社名をヘッダーに表示
-    if (json.companyName) {
-      document.querySelector('.login-sub').textContent = json.companyName;
-    }
+    sessionStorage.setItem('stockpile_company', companyCode); // 会社コードも保存
     data = await api('GET', API_DATA);
     showMain();
   } catch {
+    err.textContent = '会社IDまたはパスワードが違います';
     err.style.display = 'block';
   }
 });
@@ -764,6 +792,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
 // ─ ログアウト ─────────────────────────────────
 document.getElementById('btn-logout').addEventListener('click', () => {
   sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem('stockpile_company'); // 会社コードもクリア
   token = '';
   location.reload();
 });

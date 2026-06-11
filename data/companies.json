@@ -5,5 +5,12 @@
     "passwordHash": "56109da348e37295fcdde8b3299fde8da48c413534ab6c5670a61754b5c293e0",
     "tokenHash": "570b48094aa27f509f481f919851ca095e847f76dbf9a90449cc1bc973c0e239",
     "created": "2026-05-25"
+  },
+  {
+    "code": "resilab",
+    "name": "株式会社レジリエンスラボ",
+    "passwordHash": "7e521d371c682f4a7c2b54005604302cb480566324b4738c0be269ed88d35ed0",
+    "tokenHash": "b5e1718bb231f3a0a37eca31e4c62aaa782fd5be5aa4489d30fe2bfe295fe945",
+    "created": "2026-06-11"
   }
 ]

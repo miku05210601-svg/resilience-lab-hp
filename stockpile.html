@@ -1332,8 +1332,7 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
       // 既存データに追記して保存
       data.items = [...data.items, ...added];
       await api('POST', API_DATA, data);
-      renderTable();
-      renderDashboard();
+      render();
       showToast(`${added.length}件の品目を取り込みました`, 'success');
     } catch (err) {
       showToast('CSVの読み込みに失敗しました: ' + err.message, 'error');

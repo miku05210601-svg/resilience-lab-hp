@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "6f31e679-42ca-4596-903a-d546b664efe2",
-      "name": "手回しラジオライト",
-      "category": "電源・照明",
-      "location": "本社",
-      "unit": "台",
-      "unitQty": 10,
-      "boxes": 1,
-      "loose": 0,
-      "required": 5,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "61565d9b-2652-43a8-bcd7-7a7f1b6fb801",
       "name": "乾電池単3",
       "category": "電源・照明",

@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "78cf9bad-d307-4289-8d9a-cfa82047eb27",
-      "name": "凝固剤セット",
-      "category": "トイレ",
-      "location": "本社",
-      "unit": "個",
-      "unitQty": 100,
-      "boxes": 3,
-      "loose": 20,
-      "required": 300,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "1ce881e5-3a49-4d02-88da-38a7d356b79a",
       "name": "トイレットペーパー",
       "category": "トイレ",

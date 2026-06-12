@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "2df2d22f-7fc8-4a17-a03e-5868d782d4e6",
-      "name": "救急セット",
-      "category": "衛生",
-      "location": "本社",
-      "unit": "箱",
-      "unitQty": 1,
-      "boxes": 5,
-      "loose": 0,
-      "required": 5,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "41054f57-1870-4139-b4e4-363828e0fef9",
       "name": "LEDライト",
       "category": "電源・照明",

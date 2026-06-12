@@ -45,19 +45,6 @@
       "memo": "点検推奨"
     },
     {
-      "id": "40610c30-f24e-4a73-9b45-30d12d7bdc45",
-      "name": "カセットコンロ",
-      "category": "その他",
-      "location": "本社",
-      "unit": "台",
-      "unitQty": 1,
-      "boxes": 10,
-      "loose": 0,
-      "required": 5,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "6645a68a-aa06-4300-968c-2bfabe59ff0f",
       "name": "非常用毛布",
       "category": "その他",

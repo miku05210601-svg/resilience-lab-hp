@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "caf213fc-6771-423c-8aab-6e35e1444fc2",
-      "name": "保存水2L",
-      "category": "水",
-      "location": "本社",
-      "unit": "本",
-      "unitQty": 6,
-      "boxes": 20,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": "入替推奨"
-    },
-    {
       "id": "ac52c186-2bc7-4d7e-9e83-4acb4c844471",
       "name": "アルファ米（白飯）",
       "category": "食料",

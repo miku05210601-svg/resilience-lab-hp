@@ -1329,8 +1329,8 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
 
       if (added.length === 0) { showToast('取り込める品目がありませんでした', 'error'); return; }
 
-      // 既存データに追記して保存
-      data.items = [...data.items, ...added];
+      // 既存データに追記して保存（items が未初期化の場合も考慮）
+      data.items = [...(data.items || []), ...added];
       await api('POST', API_DATA, data);
       render();
       showToast(`${added.length}件の品目を取り込みました`, 'success');

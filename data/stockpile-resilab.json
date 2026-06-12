@@ -32,19 +32,6 @@
       "memo": "交換必要"
     },
     {
-      "id": "8faf23ad-7326-4c61-b4b3-9d167d1f799c",
-      "name": "保存ビスケット",
-      "category": "食料",
-      "location": "本社",
-      "unit": "缶",
-      "unitQty": 24,
-      "boxes": 5,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "71a4eb1e-f050-4ec4-bad4-6a1aa04f53dc",
       "name": "レトルトカレー",
       "category": "食料",

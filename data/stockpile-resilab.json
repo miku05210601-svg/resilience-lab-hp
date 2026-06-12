@@ -17,6 +17,19 @@
       "unit": "",
       "expiry": "2030-06-30",
       "memo": ""
+    },
+    {
+      "id": "bc8a3901-a236-4083-88ac-1de7db5c89c4",
+      "name": "ミネラルウォーター２L",
+      "category": "水",
+      "location": "本社",
+      "unitQty": 6,
+      "boxes": 50,
+      "loose": 0,
+      "required": 0,
+      "unit": "",
+      "expiry": "2030-06-30",
+      "memo": ""
     }
   ]
 }

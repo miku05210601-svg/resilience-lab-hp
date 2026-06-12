@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "c714c75d-ae28-4bcf-83dc-fffc858cae08",
-      "name": "携帯トイレ10回分",
-      "category": "トイレ",
-      "location": "本社",
-      "unit": "箱",
-      "unitQty": 10,
-      "boxes": 30,
-      "loose": 0,
-      "required": 300,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "78cf9bad-d307-4289-8d9a-cfa82047eb27",
       "name": "凝固剤セット",
       "category": "トイレ",

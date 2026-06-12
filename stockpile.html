@@ -1246,12 +1246,20 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = async (ev) => {
     try {
-      // UTF-8 BOM (EF BB BF) を除去、Shift-JIS にも対応
+      // BOMを検出してエンコーディングを自動判定（UTF-8/UTF-16/Shift-JIS対応）
       const bytes = new Uint8Array(ev.target.result);
       let text;
       if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+        // UTF-8 BOM
         text = new TextDecoder('utf-8').decode(bytes.slice(3));
+      } else if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
+        // UTF-16 LE BOM（ExcelのUnicode CSV保存）
+        text = new TextDecoder('utf-16le').decode(bytes.slice(2));
+      } else if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
+        // UTF-16 BE BOM
+        text = new TextDecoder('utf-16be').decode(bytes.slice(2));
       } else {
+        // BOMなし：UTF-8を試みてダメならShift-JIS
         try {
           text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
         } catch {

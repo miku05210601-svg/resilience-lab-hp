@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "71a4eb1e-f050-4ec4-bad4-6a1aa04f53dc",
-      "name": "レトルトカレー",
-      "category": "食料",
-      "location": "本社",
-      "unit": "袋",
-      "unitQty": 30,
-      "boxes": 4,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "c714c75d-ae28-4bcf-83dc-fffc858cae08",
       "name": "携帯トイレ10回分",
       "category": "トイレ",

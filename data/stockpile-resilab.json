@@ -110,19 +110,6 @@
       "memo": ""
     },
     {
-      "id": "b069e98f-8444-4209-97ba-9eeac8220a9c",
-      "name": "ブルーシート",
-      "category": "その他",
-      "location": "本社",
-      "unit": "枚",
-      "unitQty": 10,
-      "boxes": 10,
-      "loose": 0,
-      "required": 20,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "1fe74a5e-05c9-4754-9f87-c1751e9a72e7",
       "name": "養生テープ",
       "category": "その他",

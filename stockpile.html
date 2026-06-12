@@ -1286,17 +1286,28 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
         const cols = parseCSVLine(lines[i]);
         if (!cols[idx.name]) continue; // 品名が空の行はスキップ
 
-        // 使用期限：YYYY-MM-DD 形式に正規化
+        // 使用期限：YYYY-MM-DD 形式に正規化（ゼロ埋めなし・スラッシュ区切りにも対応）
         let expiry = idx.expiry >= 0 ? (cols[idx.expiry] || '').trim() : '';
-        if (expiry && !/^\d{4}-\d{2}-\d{2}$/.test(expiry)) {
+        if (expiry && expiry !== '-') {
           expiry = expiry.replace(/\//g, '-');
+          // 月・日が1桁の場合はゼロ埋め（例：2031-5-1 → 2031-05-01）
+          expiry = expiry.replace(/^(\d{4})-(\d{1,2})-(\d{1,2})$/, (_, y, m, d) =>
+            `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`
+          );
           if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry)) expiry = '';
+        } else {
+          expiry = '';
         }
+
+        // カテゴリ：システム外の値は「その他」に自動変換
+        const VALID_CATS = ['水','食料','トイレ','衛生','電源・照明','その他'];
+        const rawCat = idx.category >= 0 ? (cols[idx.category] || '').trim() : '';
+        const category = VALID_CATS.includes(rawCat) ? rawCat : 'その他';
 
         added.push({
           id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + i,
           name:     (cols[idx.name] || '').trim(),
-          category: idx.category >= 0 ? (cols[idx.category] || 'その他').trim() : 'その他',
+          category,
           location: idx.location >= 0 ? (cols[idx.location] || data.locations[0]).trim() : data.locations[0],
           unit:     idx.unit >= 0 ? (cols[idx.unit] || '個').trim() : '個',
           unitQty:  idx.unitQty >= 0 ? (parseInt(cols[idx.unitQty]) || 0) : 0,

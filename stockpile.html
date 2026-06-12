@@ -513,12 +513,19 @@ tr.row-warning td { background: #fffdf0; }
       <div class="toolbar-spacer"></div>
       <div style="font-size:12px;color:var(--muted)" id="item-count"></div>
     </div>
+    <!-- 一括削除バー（チェック時のみ表示） -->
+    <div id="bulk-bar" style="display:none;align-items:center;gap:12px;padding:8px 16px;background:var(--accent-tint);border-bottom:1px solid var(--border)">
+      <span id="bulk-count" style="font-size:13px;color:var(--accent);font-weight:600"></span>
+      <button class="btn-primary" id="btn-bulk-delete" style="background:var(--red);padding:6px 16px;font-size:13px">🗑 選択削除</button>
+      <button class="btn-secondary" id="btn-bulk-cancel" style="padding:6px 14px;font-size:13px">選択解除</button>
+    </div>
 
     <!-- テーブル -->
     <div class="table-wrap">
       <table id="items-table">
         <thead>
           <tr>
+            <th style="width:36px;text-align:center"><input type="checkbox" id="select-all" title="全選択"></th>
             <th data-sort="name">品名</th>
             <th data-sort="category">カテゴリ</th>
             <th data-sort="location">拠点</th>
@@ -691,6 +698,7 @@ let statusFilter = '';
 let deleteTargetId = null;
 let sortKey = 'expiry';
 let sortAsc = true;
+let selectedIds = new Set();
 
 // ─ API ──────────────────────────────────────
 async function api(method, path, body) {
@@ -891,19 +899,22 @@ function updateTable() {
 
   const tbody = document.getElementById('items-tbody');
   if (items.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8">
+    tbody.innerHTML = `<tr><td colspan="12">
       <div class="empty-state">
         <div class="empty-icon">📦</div>
         <div>品目が登録されていません</div>
       </div>
     </td></tr>`;
+    updateBulkBar();
     return;
   }
 
   tbody.innerHTML = items.map(item => {
     const s = getStatus(item.expiry);
     const rowClass = s === 'expired' ? 'row-expired' : s === 'warning' ? 'row-warning' : '';
+    const checked = selectedIds.has(item.id) ? 'checked' : '';
     return `<tr class="${rowClass}">
+      <td style="text-align:center"><input type="checkbox" class="row-check" data-id="${item.id}" ${checked}></td>
       <td><strong>${esc(item.name)}</strong>${item.memo ? `<br><span style="font-size:11px;color:var(--muted)">${esc(item.memo)}</span>` : ''}</td>
       <td>${esc(item.category)}</td>
       <td>${esc(item.location || '—')}</td>
@@ -920,6 +931,26 @@ function updateTable() {
       </td>
     </tr>`;
   }).join('');
+
+  // 全選択チェックボックスの状態を更新
+  const all = document.querySelectorAll('.row-check');
+  const selectAll = document.getElementById('select-all');
+  const checkedCount = [...all].filter(c => c.checked).length;
+  selectAll.checked = all.length > 0 && checkedCount === all.length;
+  selectAll.indeterminate = checkedCount > 0 && checkedCount < all.length;
+
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const count = selectedIds.size;
+  if (count === 0) {
+    bar.style.display = 'none';
+  } else {
+    bar.style.display = 'flex';
+    document.getElementById('bulk-count').textContent = `${count}件選択中`;
+  }
 }
 
 function esc(s) {
@@ -1052,12 +1083,70 @@ function openDelete(id) {
   showModal('delete-modal');
 }
 
+// ─ 削除確認（単体・一括共用） ────────────────────
 document.getElementById('delete-confirm').addEventListener('click', async () => {
-  data.items = data.items.filter(i => i.id !== deleteTargetId);
-  await saveData();
-  closeModal('delete-modal');
-  render();
-  showToast('削除しました', 'success');
+  if (deleteTargetId === null) {
+    // 一括削除
+    const count = selectedIds.size;
+    data.items = data.items.filter(i => !selectedIds.has(i.id));
+    selectedIds.clear();
+    await saveData();
+    closeModal('delete-modal');
+    render();
+    showToast(`${count}件を削除しました`, 'success');
+  } else {
+    // 単体削除
+    data.items = data.items.filter(i => i.id !== deleteTargetId);
+    selectedIds.delete(deleteTargetId);
+    await saveData();
+    closeModal('delete-modal');
+    render();
+    showToast('削除しました', 'success');
+  }
+});
+
+// ─ 一括削除 ──────────────────────────────────
+// tbody のチェックボックス変更を追跡
+document.getElementById('items-tbody').addEventListener('change', e => {
+  if (!e.target.classList.contains('row-check')) return;
+  const id = e.target.dataset.id;
+  if (e.target.checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  updateBulkBar();
+
+  const all = document.querySelectorAll('.row-check');
+  const selectAll = document.getElementById('select-all');
+  const checkedCount = [...all].filter(c => c.checked).length;
+  selectAll.checked = checkedCount === all.length;
+  selectAll.indeterminate = checkedCount > 0 && checkedCount < all.length;
+});
+
+// 全選択チェックボックス
+document.getElementById('select-all').addEventListener('change', e => {
+  document.querySelectorAll('.row-check').forEach(cb => {
+    cb.checked = e.target.checked;
+    if (e.target.checked) selectedIds.add(cb.dataset.id);
+    else selectedIds.delete(cb.dataset.id);
+  });
+  updateBulkBar();
+});
+
+// 選択解除ボタン
+document.getElementById('btn-bulk-cancel').addEventListener('click', () => {
+  selectedIds.clear();
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+  const selectAll = document.getElementById('select-all');
+  selectAll.checked = false;
+  selectAll.indeterminate = false;
+  updateBulkBar();
+});
+
+// 一括削除ボタン → 確認ダイアログ表示
+document.getElementById('btn-bulk-delete').addEventListener('click', () => {
+  if (selectedIds.size === 0) return;
+  document.getElementById('delete-item-name').textContent = `選択した ${selectedIds.size} 件`;
+  deleteTargetId = null; // nullで一括モードと判定
+  showModal('delete-modal');
 });
 
 // ─ 設定モーダル ──────────────────────────────

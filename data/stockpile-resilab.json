@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "08fc5aac-da23-4a10-8fa5-1895017ffaea",
-      "name": "保存水500mL",
-      "category": "水",
-      "location": "本社",
-      "unit": "本",
-      "unitQty": 24,
-      "boxes": 13,
-      "loose": 8,
-      "required": 300,
-      "expiry": "",
-      "memo": "社員用"
-    },
-    {
       "id": "caf213fc-6771-423c-8aab-6e35e1444fc2",
       "name": "保存水2L",
       "category": "水",

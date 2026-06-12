@@ -1157,8 +1157,18 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = async (ev) => {
     try {
-      // BOM除去
-      let text = ev.target.result.replace(/^﻿/, '');
+      // UTF-8 BOM (EF BB BF) を除去、Shift-JIS にも対応
+      const bytes = new Uint8Array(ev.target.result);
+      let text;
+      if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+        text = new TextDecoder('utf-8').decode(bytes.slice(3));
+      } else {
+        try {
+          text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        } catch {
+          text = new TextDecoder('shift-jis').decode(bytes);
+        }
+      }
       const lines = text.split(/\r?\n/).filter(l => l.trim());
       if (lines.length < 2) { showToast('データが空です', 'error'); return; }
 
@@ -1221,7 +1231,7 @@ document.getElementById('csv-file-input').addEventListener('change', (e) => {
       showToast('CSVの読み込みに失敗しました: ' + err.message, 'error');
     }
   };
-  reader.readAsText(file, 'UTF-8');
+  reader.readAsArrayBuffer(file);
 });
 
 // CSV1行をパース（ダブルクォート対応）

@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "1ce881e5-3a49-4d02-88da-38a7d356b79a",
-      "name": "トイレットペーパー",
-      "category": "トイレ",
-      "location": "本社",
-      "unit": "巻",
-      "unitQty": 12,
-      "boxes": 25,
-      "loose": 0,
-      "required": 300,
-      "expiry": "",
-      "memo": "期限なし"
-    },
-    {
       "id": "ee6cb37d-369c-46a7-90fb-9d0b6ff3398b",
       "name": "ウェットティッシュ",
       "category": "衛生",

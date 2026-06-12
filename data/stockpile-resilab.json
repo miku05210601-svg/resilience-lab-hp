@@ -32,19 +32,6 @@
       "memo": ""
     },
     {
-      "id": "1fe74a5e-05c9-4754-9f87-c1751e9a72e7",
-      "name": "養生テープ",
-      "category": "その他",
-      "location": "本社",
-      "unit": "巻",
-      "unitQty": 30,
-      "boxes": 4,
-      "loose": 0,
-      "required": 50,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "6b50a61f-621e-490e-a2a3-a390aaeb5445",
       "name": "ラジオ（手回し）",
       "category": "防災用品",

@@ -45,19 +45,6 @@
       "memo": ""
     },
     {
-      "id": "6f0f1de9-7c53-4822-9abd-e88132b53ccc",
-      "name": "アルコール消毒液500mL",
-      "category": "衛生",
-      "location": "本社",
-      "unit": "本",
-      "unitQty": 12,
-      "boxes": 10,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "2df2d22f-7fc8-4a17-a03e-5868d782d4e6",
       "name": "救急セット",
       "category": "衛生",

@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "b4a850b6-0cf5-4d8a-91c0-50026504d4dc",
-      "name": "保存パン",
-      "category": "食料",
-      "location": "本社",
-      "unit": "食",
-      "unitQty": 24,
-      "boxes": 5,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": "交換必要"
-    },
-    {
       "id": "71a4eb1e-f050-4ec4-bad4-6a1aa04f53dc",
       "name": "レトルトカレー",
       "category": "食料",

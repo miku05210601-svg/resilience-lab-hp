@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "6645a68a-aa06-4300-968c-2bfabe59ff0f",
-      "name": "非常用毛布",
-      "category": "その他",
-      "location": "本社",
-      "unit": "枚",
-      "unitQty": 10,
-      "boxes": 12,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "3a464f3e-45a9-48b8-88ca-4547f3aa1e04",
       "name": "アルミブランケット",
       "category": "その他",

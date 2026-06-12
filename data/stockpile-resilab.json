@@ -45,19 +45,6 @@
       "memo": ""
     },
     {
-      "id": "0f5bb1f0-1e22-4a52-9982-aa76fdefabf9",
-      "name": "軍手",
-      "category": "その他",
-      "location": "本社",
-      "unit": "双",
-      "unitQty": 12,
-      "boxes": 25,
-      "loose": 0,
-      "required": 300,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "6b50a61f-621e-490e-a2a3-a390aaeb5445",
       "name": "ラジオ（手回し）",
       "category": "防災用品",

@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "0c6c785f-98ab-4a06-a06e-ce763638599a",
-      "name": "マスク",
-      "category": "衛生",
-      "location": "本社",
-      "unit": "枚",
-      "unitQty": 50,
-      "boxes": 10,
-      "loose": 0,
-      "required": 300,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "3f3a7dc1-def8-4102-be4b-2bd83981964b",
       "name": "使い捨て手袋",
       "category": "衛生",

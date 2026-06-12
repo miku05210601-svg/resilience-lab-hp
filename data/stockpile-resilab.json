@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "61565d9b-2652-43a8-bcd7-7a7f1b6fb801",
-      "name": "乾電池単3",
-      "category": "電源・照明",
-      "location": "本社",
-      "unit": "本",
-      "unitQty": 40,
-      "boxes": 10,
-      "loose": 0,
-      "required": 300,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "9a0461c3-d41e-4090-a928-5bf006c0224b",
       "name": "乾電池単4",
       "category": "電源・照明",

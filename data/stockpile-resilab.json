@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "3a464f3e-45a9-48b8-88ca-4547f3aa1e04",
-      "name": "アルミブランケット",
-      "category": "その他",
-      "location": "本社",
-      "unit": "枚",
-      "unitQty": 20,
-      "boxes": 6,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "e7a6b304-3533-48e7-ac8f-fa693fe7d964",
       "name": "ヘルメット",
       "category": "その他",

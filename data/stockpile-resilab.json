@@ -19,19 +19,6 @@
       "memo": "倉庫保存"
     },
     {
-      "id": "3f3a7dc1-def8-4102-be4b-2bd83981964b",
-      "name": "使い捨て手袋",
-      "category": "衛生",
-      "location": "本社",
-      "unit": "枚",
-      "unitQty": 100,
-      "boxes": 5,
-      "loose": 0,
-      "required": 300,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "2df2d22f-7fc8-4a17-a03e-5868d782d4e6",
       "name": "救急セット",
       "category": "衛生",

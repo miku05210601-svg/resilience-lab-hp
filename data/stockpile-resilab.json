@@ -58,19 +58,6 @@
       "memo": ""
     },
     {
-      "id": "a8b59eca-f7f5-414b-b254-274db886781b",
-      "name": "カセットボンベ",
-      "category": "その他",
-      "location": "本社",
-      "unit": "本",
-      "unitQty": 3,
-      "boxes": 40,
-      "loose": 0,
-      "required": 100,
-      "expiry": "",
-      "memo": ""
-    },
-    {
       "id": "6645a68a-aa06-4300-968c-2bfabe59ff0f",
       "name": "非常用毛布",
       "category": "その他",

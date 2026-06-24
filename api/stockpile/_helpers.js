@@ -146,6 +146,17 @@ async function saveStockpile(jsonData, sha) {
   return githubPut('data/stockpile.json', jsonData, sha, '備蓄品データ更新');
 }
 
+// 総数量 = 1箱入数 × 箱数 + バラ数（旧データの stock 項目とも互換）
+function calcStock(item) {
+  const unitQty = Number(item.unitQty) || 0;
+  const boxes   = Number(item.boxes)   || 0;
+  const loose   = Number(item.loose)   || 0;
+  if (unitQty === 0 && boxes === 0 && loose === 0 && item.stock !== undefined) {
+    return Number(item.stock) || 0;
+  }
+  return unitQty * boxes + loose;
+}
+
 // ─ ステータス判定 ─────────────────────────────────
 function getStatus(expiry, alertDays) {
   if (!expiry) return 'ok';
@@ -163,5 +174,5 @@ module.exports = {
   loadCompanies, saveCompanies,
   loadCompanyData, saveCompanyData,
   loadStockpile, saveStockpile,
-  getStatus,
+  calcStock, getStatus,
 };

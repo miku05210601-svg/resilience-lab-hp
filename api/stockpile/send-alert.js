@@ -1,5 +1,5 @@
 const https = require('https');
-const { authCheck, loadStockpile, getStatus } = require('./_helpers');
+const { authCheck, loadStockpile, calcStock, getStatus } = require('./_helpers');
 
 // https モジュールでResend APIを呼ぶ
 function resendPost(payload) {
@@ -49,16 +49,18 @@ async function sendAlertWithResend(data) {
     const diff = item.expiry
       ? Math.floor((new Date(item.expiry) - new Date()) / 86400000)
       : null;
-    const expLabel = item.expiry ? `${item.expiry}（残${diff}日）` : '期限なし';
-    const shortage = item.required > 0 && item.stock < item.required
-      ? `-${item.required - item.stock} 不足`
-      : `+${item.stock - (item.required || 0)} 余剰`;
+    const expLabel = item.expiry
+      ? (diff < 0 ? `${item.expiry}（${-diff}日超過）` : `${item.expiry}（残${diff}日）`)
+      : '期限なし';
+    const stock = calcStock(item);
+    const surplusDiff = stock - (item.required || 0);
+    const shortage = surplusDiff >= 0 ? `+${surplusDiff} 余剰` : `${surplusDiff} 不足`;
     return `<tr>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${badge}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${item.name}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${item.category}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${item.location}</td>
-      <td style="padding:6px 12px;border-bottom:1px solid #eee">${item.stock} ${item.unit}</td>
+      <td style="padding:6px 12px;border-bottom:1px solid #eee">${stock} ${item.unit}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${shortage}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${expLabel}</td>
     </tr>`;

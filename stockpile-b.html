@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>備蓄品管理システム | レジリエンスラボ</title>
+<link rel="icon" type="image/png" href="/bcp-check/resilab_favicon.png">
+<style>
+:root {
+  --bg: #f5f3f0;
+  --surface: #ffffff;
+  --surface2: #f8f6f4;
+  --border: #e5e0db;
+  --accent: #8b1a2e;
+  --accent-light: #b04060;
+  --accent-tint: rgba(139,26,46,0.07);
+  --text: #1a1a1a;
+  --text2: #3d3d3d;
+  --muted: #888888;
+  --red: #dc2626;
+  --yellow: #d97706;
+  --green: #16a34a;
+  --red-bg: #fef2f2;
+  --yellow-bg: #fffbeb;
+  --green-bg: #f0fdf4;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Hiragino Kaku Gothic ProN','Yu Gothic UI','Segoe UI',sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ─ ログイン画面 ─ */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(150deg, #faf7f4 0%, #ede4d8 60%, #e0d4c8 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+#login-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 60% at 5% 50%, rgba(139,26,46,.07) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 55% at 95% 50%, rgba(100,120,160,.07) 0%, transparent 65%);
+  pointer-events: none;
+}
+.login-topbar {
+  align-self: stretch;
+  padding: 22px 32px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.login-topbar img { height: 72px; }
+.login-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 24px 24px;
+  position: relative;
+  z-index: 1;
+}
+.login-card {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 36px 52px 44px;
+  width: 500px;
+  max-width: 100%;
+  text-align: center;
+}
+.login-card-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.login-icon-wrap { margin-bottom: 18px; }
+.login-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: -.02em;
+}
+.login-sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  color: #c8b8b0;
+}
+.login-divider::before,
+.login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.login-field { margin-bottom: 14px; text-align: left; }
+.login-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 5px;
+  padding-left: 2px;
+  letter-spacing: .03em;
+}
+.login-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.login-field-wrap .field-icon {
+  position: absolute;
+  left: 14px;
+  color: #b8a8a0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.login-field-wrap input {
+  width: 100%;
+  padding: 13px 14px 13px 44px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  background: #fff;
+  color: var(--text);
+}
+.login-field-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(139,26,46,.09);
+}
+.pw-toggle {
+  position: absolute;
+  right: 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #b8a8a0;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color .2s;
+}
+.pw-toggle:hover { color: var(--accent); }
+.login-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  margin-top: 6px;
+  letter-spacing: .05em;
+}
+.login-btn:hover { background: var(--accent-light); }
+.login-btn:active { transform: scale(.99); }
+.login-error {
+  color: var(--red);
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}
+.login-card-footer {
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.login-card-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.login-card-footer a:hover { text-decoration: underline; }
+.login-features {
+  width: 100%;
+  max-width: 600px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 0 24px 4px;
+  position: relative;
+  z-index: 1;
+}
+.login-feature {
+  text-align: center;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.login-feature-icon { color: var(--accent); margin-bottom: 2px; }
+.login-feature-title { font-size: 12px; font-weight: 700; color: var(--text2); }
+.login-feature-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.login-page-footer {
+  padding: 10px 24px 24px;
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 540px) {
+  .login-topbar { padding: 18px 20px; }
+  .login-card { padding: 36px 24px 32px; }
+  .login-title { font-size: 22px; }
+  .login-features { grid-template-columns: 1fr; }
+}
+
+/* ─ メイン画面 ─ */
+#main-screen { display: none; }
+
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.app-header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.header-spacer { flex: 1; }
+.header-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.header-filter select {
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.btn-icon {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text2);
+  transition: border-color .2s, background .2s;
+  white-space: nowrap;
+}
+.btn-icon:hover { border-color: var(--accent); background: var(--accent-tint); color: var(--accent); }
+.btn-logout {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+.btn-logout:hover { color: var(--red); }
+
+.container { max-width: 1280px; margin: 0 auto; padding: 24px 24px; }
+
+/* ─ ダッシュボード ─ */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.dash-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  border-left: 4px solid transparent;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform .15s;
+}
+.dash-card:hover { transform: translateY(-1px); }
+.dash-card.expired { border-left-color: var(--red); background: var(--red-bg); }
+.dash-card.warning { border-left-color: var(--yellow); background: var(--yellow-bg); }
+.dash-card.ok { border-left-color: var(--green); background: var(--green-bg); }
+.dash-num { font-size: 36px; font-weight: 800; line-height: 1; }
+.dash-card.expired .dash-num { color: var(--red); }
+.dash-card.warning .dash-num { color: var(--yellow); }
+.dash-card.ok .dash-num { color: var(--green); }
+.dash-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* ─ ツールバー ─ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: var(--accent-light); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  white-space: nowrap;
+}
+.btn-secondary:hover { border-color: var(--accent); background: var(--accent-tint); color: var(--accent); }
+.toolbar-spacer { flex: 1; }
+
+/* ─ テーブル ─ */
+.table-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--surface2); }
+th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover { color: var(--accent); }
+td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text2);
+  vertical-align: middle;
+}
+tr:hover td { background: var(--accent-tint); }
+tr.row-expired td { background: #fff5f5; }
+tr.row-warning td { background: #fffdf0; }
+
+/* ─ ステータスバッジ ─ */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-expired { background: #fee2e2; color: var(--red); }
+.badge-warning { background: #fef3c7; color: var(--yellow); }
+.badge-ok { background: #dcfce7; color: var(--green); }
+
+/* ─ 過不足 ─ */
+.surplus { color: var(--green); font-weight: 600; }
+.shortage { color: var(--red); font-weight: 600; }
+.neutral { color: var(--muted); }
+
+/* ─ 操作ボタン ─ */
+.action-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all .15s;
+  margin-right: 4px;
+}
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.action-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--muted);
+}
+.empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+/* ─ モーダル共通 ─ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,.16);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-header {
+  padding: 20px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--muted);
+  line-height: 1;
+  padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ─ フォーム ─ */
+.form-row { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: .3px;
+}
+.form-label .required { color: var(--red); margin-left: 2px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s;
+  background: var(--surface);
+  color: var(--text);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 72px; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* ─ 設定モーダル ─ */
+.settings-section { margin-bottom: 28px; }
+.settings-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent-tint);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+.contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; align-items: center; }
+.contact-num { font-size: 12px; font-weight: 700; color: var(--muted); text-align: center; }
+.location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.location-tag {
+  background: var(--accent-tint);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.location-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+.location-add-row { display: flex; gap: 8px; }
+.location-add-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  outline: none;
+}
+.location-add-row input:focus { border-color: var(--accent); }
+
+/* ─ トースト通知 ─ */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1a1a1a;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .25s, transform .25s;
+  z-index: 9999;
+  pointer-events: none;
+  max-width: 320px;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.success { background: var(--green); }
+#toast.error { background: var(--red); }
+
+/* ─ フィルター強調 ─ */
+.filter-active { color: var(--accent) !important; border-color: var(--accent) !important; }
+
+/* ─ レスポンシブ ─ */
+@media (max-width: 768px) {
+  .app-header { padding: 0 16px; gap: 10px; }
+  .app-header-title { font-size: 14px; }
+  .container { padding: 16px; }
+  .dashboard { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .dash-num { font-size: 28px; }
+  .toolbar { gap: 8px; }
+}
+@media (max-width: 480px) {
+  .dashboard { grid-template-columns: 1fr; }
+  .header-filter label { display: none; }
+  .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+  .contact-row { grid-template-columns: 1fr; }
+  table { min-width: 700px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div id="login-screen">
+
+  <!-- ログインカード -->
+  <div class="login-main">
+    <div class="login-card">
+
+      <!-- カード左上ロゴ -->
+      <div class="login-card-logo">
+        <img src="/bcp-check/resilab_logo2.png" alt="レジリエンスラボ" style="height:48px;width:auto;">
+      </div>
+
+      <!-- 備蓄品アイコン -->
+      <div class="login-icon-wrap">
+        <img src="/bcp-check/stockpile_icon.png" alt="備蓄品管理" style="width:110px;height:auto">
+      </div>
+
+      <div class="login-title">備蓄品管理システム</div>
+      <div class="login-sub">備蓄品を一元管理し、安心・安全な未来を支えます</div>
+
+      <!-- 区切り（シールド） -->
+      <div class="login-divider">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 1.5L2.5 4.5v4.5C2.5 13 5.5 16.2 9 17c3.5-.8 6.5-4 6.5-8V4.5L9 1.5z" stroke="#c8b8b0" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M6 9l2 2 4-4" stroke="#c8b8b0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- フォーム -->
+      <form id="login-form">
+        <div class="login-field">
+          <label>会社ID</label>
+          <div class="login-field-wrap">
+            <span class="field-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="6" r="3.5" stroke="#b8a8a0" stroke-width="1.5"/>
+                <path d="M2 15.5c0-3 3-5 7-5s7 2 7 5" stroke="#b8a8a0" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <input type="text" id="login-company-id" placeholder="会社IDを入力" autocomplete="username" autocapitalize="none">
+          </div>
+        </div>
+        <div class="login-field">
+          <label>パスワード</label>
+          <div class="login-field-wrap">
+            <span class="field-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="3" y="8" width="12" height="8" rx="2" stroke="#b8a8a0" stroke-width="1.5"/>
+                <path d="M6 8V6a3 3 0 016 0v2" stroke="#b8a8a0" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="9" cy="12" r="1.2" fill="#b8a8a0"/>
+              </svg>
+            </span>
+            <input type="password" id="login-password" placeholder="パスワードを入力" autocomplete="current-password">
+            <button type="button" class="pw-toggle" id="pw-toggle" aria-label="パスワード表示切替">
+              <svg id="pw-eye-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M1 9s3-5.5 8-5.5S17 9 17 9s-3 5.5-8 5.5S1 9 1 9z" stroke="#b8a8a0" stroke-width="1.5"/>
+                <circle cx="9" cy="9" r="2.2" stroke="#b8a8a0" stroke-width="1.5"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="login-btn">ログイン</button>
+        <div class="login-error" id="login-error">会社IDまたはパスワードが違います</div>
+      </form>
+
+      <!-- カードフッター -->
+      <div class="login-card-footer">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="5" width="12" height="8" rx="1.5" stroke="#aaa" stroke-width="1.2"/>
+          <path d="M4 5V4a3 3 0 016 0v1" stroke="#aaa" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        このシステムは <a href="https://resilab-jpn.com/" target="_blank" rel="noopener">株式会社レジリエンスラボ</a> が提供しています
+      </div>
+    </div>
+  </div>
+
+  <!-- ページフッター -->
+  <div class="login-page-footer">© 2026 株式会社レジリエンスラボ All rights reserved.</div>
+</div>
+
+<!-- メイン画面 -->
+<div id="main-screen">
+  <!-- ヘッダー -->
+  <header class="app-header">
+    <div class="app-header-title" style="display:flex;align-items:center;gap:8px;"><img src="/bcp-check/resilab_icon.png" style="height:24px;width:auto;"> 備蓄品管理</div>
+    <div class="header-spacer"></div>
+    <div class="header-filter">
+      <label>拠点</label>
+      <select id="location-filter">
+        <option value="">全て</option>
+      </select>
+    </div>
+    <button class="btn-icon" id="btn-settings">⚙ 設定</button>
+    <button class="btn-logout" id="btn-logout">ログアウト</button>
+  </header>
+
+  <div class="container">
+    <!-- ダッシュボード -->
+    <div class="dashboard">
+      <div class="dash-card expired" data-filter="expired">
+        <div class="dash-num" id="count-expired">0</div>
+        <div class="dash-label">🔴 期限切れ</div>
+      </div>
+      <div class="dash-card warning" data-filter="warning">
+        <div class="dash-num" id="count-warning">0</div>
+        <div class="dash-label">🟡 期限90日以内</div>
+      </div>
+      <div class="dash-card ok" data-filter="ok">
+        <div class="dash-num" id="count-ok">0</div>
+        <div class="dash-label">🟢 正常</div>
+      </div>
+    </div>
+
+    <!-- ツールバー -->
+    <div class="toolbar">
+      <button class="btn-primary" id="btn-add">＋ 品目追加</button>
+      <button class="btn-secondary" id="btn-export">📥 CSVエクスポート</button>
+      <button class="btn-secondary" id="btn-import">📤 CSVインポート</button>
+      <input type="file" id="csv-file-input" accept=".csv" style="display:none">
+      <button class="btn-secondary" id="btn-send-alert">📧 アラートメール送信</button>
+      <div class="toolbar-spacer"></div>
+      <div style="font-size:12px;color:var(--muted)" id="item-count"></div>
+    </div>
+    <!-- 一括削除バー（チェック時のみ表示） -->
+    <div id="bulk-bar" style="display:none;align-items:center;gap:12px;padding:8px 16px;background:var(--accent-tint);border-bottom:1px solid var(--border)">
+      <span id="bulk-count" style="font-size:13px;color:var(--accent);font-weight:600"></span>
+      <button class="btn-primary" id="btn-bulk-delete" style="background:var(--red);padding:6px 16px;font-size:13px">🗑 選択削除</button>
+      <button class="btn-secondary" id="btn-bulk-cancel" style="padding:6px 14px;font-size:13px">選択解除</button>
+    </div>
+
+    <!-- テーブル -->
+    <div class="table-wrap">
+      <table id="items-table">
+        <thead>
+          <tr>
+            <th style="width:36px;text-align:center"><input type="checkbox" id="select-all" title="全選択"></th>
+            <th data-sort="name">品名</th>
+            <th data-sort="category">カテゴリ</th>
+            <th data-sort="location">拠点</th>
+            <th>1箱入数</th>
+            <th>箱数</th>
+            <th>バラ数</th>
+            <th data-sort="stock">総数量</th>
+            <th>過不足</th>
+            <th data-sort="expiry">使用期限</th>
+            <th>状態</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="items-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 品目追加・編集モーダル -->
+<div class="modal-overlay" id="item-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="item-modal-title">品目追加</div>
+      <button class="modal-close" data-close="item-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="item-id">
+      <div class="form-row">
+        <label class="form-label">品名<span class="required">*</span></label>
+        <input class="form-input" id="item-name" placeholder="例：ミネラルウォーター 2L">
+      </div>
+      <div class="form-row-2">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">カテゴリ<span class="required">*</span></label>
+          <select class="form-select" id="item-category">
+            <option value="水">水</option>
+            <option value="食料">食料</option>
+            <option value="トイレ">トイレ</option>
+            <option value="衛生">衛生</option>
+            <option value="電源・照明">電源・照明</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">拠点</label>
+          <select class="form-select" id="item-location"></select>
+        </div>
+      </div>
+      <div class="form-row-3" style="margin-top:16px">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">単位</label>
+          <input class="form-input" id="item-unit" placeholder="本・個・箱">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">1箱入数</label>
+          <input class="form-input" type="number" id="item-unit-qty" min="0" placeholder="0">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">必要数</label>
+          <input class="form-input" type="number" id="item-required" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-row-3" style="margin-top:12px">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">箱数</label>
+          <input class="form-input" type="number" id="item-boxes" min="0" placeholder="0">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">バラ数</label>
+          <input class="form-input" type="number" id="item-loose" min="0" placeholder="0">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-label">総数量（自動計算）</label>
+          <input class="form-input" id="item-stock-display" readonly style="background:var(--bg-input,#f0f0f0);color:var(--accent);font-weight:700" placeholder="—">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:16px">
+        <label class="form-label">使用期限（空欄＝期限なし）</label>
+        <input class="form-input" type="date" id="item-expiry">
+      </div>
+      <div class="form-row">
+        <label class="form-label">メモ（保管場所など）</label>
+        <textarea class="form-textarea" id="item-memo" placeholder="倉庫3棚、医務室など"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="item-modal">キャンセル</button>
+      <button class="btn-primary" id="item-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 設定モーダル -->
+<div class="modal-overlay" id="settings-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚙ 設定</div>
+      <button class="modal-close" data-close="settings-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- 担当者設定 -->
+      <div class="settings-section">
+        <div class="settings-section-title">担当者（メール通知先）</div>
+        <div id="contacts-form"></div>
+      </div>
+      <!-- 拠点管理 -->
+      <div class="settings-section">
+        <div class="settings-section-title">拠点管理</div>
+        <div class="location-tags" id="location-tags"></div>
+        <div class="location-add-row">
+          <input type="text" id="location-new-input" placeholder="新しい拠点名">
+          <button class="btn-secondary" id="btn-add-location">追加</button>
+        </div>
+      </div>
+      <!-- 警告日数 -->
+      <div class="settings-section">
+        <div class="settings-section-title">期限警告日数</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input class="form-input" type="number" id="alert-days" style="width:100px" min="1" max="365">
+          <span style="color:var(--muted);font-size:13px">日以内を⚠警告として表示</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="settings-modal">キャンセル</button>
+      <button class="btn-primary" id="settings-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 削除確認モーダル -->
+<div class="modal-overlay" id="delete-modal" style="display:none">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">削除の確認</div>
+      <button class="modal-close" data-close="delete-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text2)">「<strong id="delete-item-name"></strong>」を削除しますか？この操作は元に戻せません。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close="delete-modal">キャンセル</button>
+      <button class="btn-primary" id="delete-confirm" style="background:var(--red)">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- トースト -->
+<div id="toast"></div>
+
+<script>
+// ─ 状態管理 ─────────────────────────────────
+// URLから会社コードを取得（/stockpile/abc-company → 'abc-company'）
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const urlCompanyCode = pathParts[1] || '';
+
+// ログイン済みの場合はsessionStorageから会社コードを復元、なければURLのコードを使用
+let companyCode = sessionStorage.getItem('stockpile_company') || urlCompanyCode;
+
+// 会社コードがある場合は会社別APIを使用（let: ログイン時に再設定）
+let API_LOGIN  = companyCode ? `/api/stockpile/${companyCode}/login`     : '/api/stockpile/login';
+let API_DATA   = companyCode ? `/api/stockpile/${companyCode}/data`       : '/api/stockpile/data';
+let API_ALERT  = companyCode ? `/api/stockpile/${companyCode}/send-alert` : '/api/stockpile/send-alert';
+let TOKEN_KEY  = companyCode ? `stockpile_token_${companyCode}`           : 'stockpile_token';
+
+let token = sessionStorage.getItem(TOKEN_KEY) || '';
+let data = { contacts: [], locations: ['本社'], alertDays: 90, items: [] };
+let statusFilter = '';
+let deleteTargetId = null;
+let sortKey = 'expiry';
+let sortAsc = true;
+let selectedIds = new Set();
+
+// ─ API ──────────────────────────────────────
+async function api(method, path, body) {
+  const res = await fetch(path, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ─ 初期化 ────────────────────────────────────
+async function init() {
+  // URLに会社コードがある場合、ログイン画面のIDフィールドに自動入力
+  if (urlCompanyCode) {
+    document.getElementById('login-company-id').value = urlCompanyCode;
+  }
+
+  // 会社コードがある場合、会社名をタイトルに表示
+  if (companyCode) {
+    document.title = `備蓄品管理 | ${companyCode}`;
+  }
+
+  if (token) {
+    try {
+      data = await api('GET', API_DATA);
+      showMain();
+    } catch {
+      sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem('stockpile_company');
+      token = '';
+      showLogin();
+    }
+  } else {
+    showLogin();
+  }
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-screen').style.display = 'none';
+}
+
+function showMain() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'block';
+  render();
+}
+
+// ─ パスワード表示切替 ─────────────────────────
+document.getElementById('pw-toggle').addEventListener('click', () => {
+  const input = document.getElementById('login-password');
+  const icon  = document.getElementById('pw-eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = `<path d="M1 9s3-5.5 8-5.5S17 9 17 9s-3 5.5-8 5.5S1 9 1 9z" stroke="#8b1a2e" stroke-width="1.5"/><circle cx="9" cy="9" r="2.2" stroke="#8b1a2e" stroke-width="1.5"/><line x1="2" y1="2" x2="16" y2="16" stroke="#8b1a2e" stroke-width="1.5" stroke-linecap="round"/>`;
+  } else {
+    input.type = 'password';
+    icon.innerHTML = `<path d="M1 9s3-5.5 8-5.5S17 9 17 9s-3 5.5-8 5.5S1 9 1 9z" stroke="#b8a8a0" stroke-width="1.5"/><circle cx="9" cy="9" r="2.2" stroke="#b8a8a0" stroke-width="1.5"/>`;
+  }
+});
+
+// ─ ログイン ──────────────────────────────────
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const enteredId = document.getElementById('login-company-id').value.trim();
+  const pw = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+
+  // 会社ID未入力チェック
+  if (!enteredId) {
+    err.textContent = '会社IDを入力してください';
+    err.style.display = 'block';
+    return;
+  }
+
+  // 入力された会社IDでAPI URLを確定
+  companyCode = enteredId;
+  API_LOGIN = `/api/stockpile/${companyCode}/login`;
+  API_DATA  = `/api/stockpile/${companyCode}/data`;
+  API_ALERT = `/api/stockpile/${companyCode}/send-alert`;
+  TOKEN_KEY = `stockpile_token_${companyCode}`;
+
+  try {
+    const res = await fetch(API_LOGIN, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    if (!res.ok) {
+      err.textContent = '会社IDまたはパスワードが違います';
+      err.style.display = 'block';
+      return;
+    }
+    const json = await res.json();
+    token = json.token;
+    sessionStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem('stockpile_company', companyCode); // 会社コードも保存
+    data = await api('GET', API_DATA);
+    showMain();
+  } catch {
+    err.textContent = '会社IDまたはパスワードが違います';
+    err.style.display = 'block';
+  }
+});
+
+// ─ ログアウト ─────────────────────────────────
+document.getElementById('btn-logout').addEventListener('click', () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem('stockpile_company'); // 会社コードもクリア
+  token = '';
+  location.reload();
+});
+
+// ─ ステータス判定 ─────────────────────────────
+function getStatus(expiry) {
+  if (!expiry) return 'ok';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const exp = new Date(expiry);
+  const diff = Math.floor((exp - today) / 86400000);
+  if (diff < 0) return 'expired';
+  if (diff <= (data.alertDays || 90)) return 'warning';
+  return 'ok';
+}
+
+function statusLabel(s) {
+  if (s === 'expired') return '<span class="badge badge-expired">🔴 期限切れ</span>';
+  if (s === 'warning') return '<span class="badge badge-warning">🟡 要確認</span>';
+  return '<span class="badge badge-ok">🟢 正常</span>';
+}
+
+function daysLabel(expiry) {
+  if (!expiry) return '<span style="color:var(--muted)">期限なし</span>';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.floor((new Date(expiry) - today) / 86400000);
+  const style = diff < 0 ? 'color:var(--red)' : diff <= (data.alertDays||90) ? 'color:var(--yellow)' : 'color:var(--text2)';
+  const suffix = diff < 0 ? `（${-diff}日超過）` : `（残${diff}日）`;
+  return `<span style="${style}">${expiry}${suffix}</span>`;
+}
+
+// 総数量 = 1箱入数 × 箱数 + バラ数
+function calcStock(item) {
+  const unitQty = Number(item.unitQty) || 0;
+  const boxes   = Number(item.boxes)   || 0;
+  const loose   = Number(item.loose)   || 0;
+  // 旧データ（stockフィールドのみ）との互換性を保つ
+  if (unitQty === 0 && boxes === 0 && loose === 0 && item.stock !== undefined) {
+    return Number(item.stock) || 0;
+  }
+  return unitQty * boxes + loose;
+}
+
+function surplusLabel(stock, required, unit) {
+  if (!required && required !== 0) return '<span class="neutral">—</span>';
+  const diff = (stock || 0) - (required || 0);
+  if (diff >= 0) return `<span class="surplus">+${diff} 余剰</span>`;
+  return `<span class="shortage">${diff} 不足</span>`;
+}
+
+// ─ レンダリング ───────────────────────────────
+function render() {
+  updateLocationFilter();
+  updateDashboard();
+  updateTable();
+  document.getElementById('item-count').textContent = `全 ${data.items.length} 件`;
+}
+
+function updateLocationFilter() {
+  const sel = document.getElementById('location-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">全拠点</option>';
+  (data.locations || []).forEach(loc => {
+    const opt = document.createElement('option');
+    opt.value = loc; opt.textContent = loc;
+    if (loc === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function updateDashboard() {
+  const counts = { expired: 0, warning: 0, ok: 0 };
+  data.items.forEach(item => counts[getStatus(item.expiry)]++);
+  document.getElementById('count-expired').textContent = counts.expired;
+  document.getElementById('count-warning').textContent = counts.warning;
+  document.getElementById('count-ok').textContent = counts.ok;
+}
+
+function updateTable() {
+  const locFilter = document.getElementById('location-filter').value;
+  let items = data.items.filter(item => {
+    if (locFilter && item.location !== locFilter) return false;
+    if (statusFilter && getStatus(item.expiry) !== statusFilter) return false;
+    return true;
+  });
+
+  // ソート
+  items = items.slice().sort((a, b) => {
+    let va = a[sortKey] || '', vb = b[sortKey] || '';
+    if (sortKey === 'stock' || sortKey === 'required') {
+      va = Number(va) || 0; vb = Number(vb) || 0;
+    }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  const tbody = document.getElementById('items-tbody');
+  if (items.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="12">
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <div>品目が登録されていません</div>
+      </div>
+    </td></tr>`;
+    updateBulkBar();
+    return;
+  }
+
+  tbody.innerHTML = items.map(item => {
+    const s = getStatus(item.expiry);
+    const rowClass = s === 'expired' ? 'row-expired' : s === 'warning' ? 'row-warning' : '';
+    const checked = selectedIds.has(item.id) ? 'checked' : '';
+    return `<tr class="${rowClass}">
+      <td style="text-align:center"><input type="checkbox" class="row-check" data-id="${item.id}" ${checked}></td>
+      <td><strong>${esc(item.name)}</strong>${item.memo ? `<br><span style="font-size:11px;color:var(--muted)">${esc(item.memo)}</span>` : ''}</td>
+      <td>${esc(item.category)}</td>
+      <td>${esc(item.location || '—')}</td>
+      <td style="text-align:right">${item.unitQty ?? '—'}</td>
+      <td style="text-align:right">${item.boxes ?? '—'}</td>
+      <td style="text-align:right">${item.loose ?? '—'}</td>
+      <td style="text-align:right;font-weight:700">${calcStock(item)} ${esc(item.unit || '')}</td>
+      <td>${surplusLabel(calcStock(item), item.required, item.unit)}</td>
+      <td>${daysLabel(item.expiry)}</td>
+      <td>${statusLabel(s)}</td>
+      <td>
+        <button class="action-btn" onclick="openEdit('${item.id}')">編集</button>
+        <button class="action-btn del" onclick="openDelete('${item.id}')">削除</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // 全選択チェックボックスの状態を更新
+  const all = document.querySelectorAll('.row-check');
+  const selectAll = document.getElementById('select-all');
+  const checkedCount = [...all].filter(c => c.checked).length;
+  selectAll.checked = all.length > 0 && checkedCount === all.length;
+  selectAll.indeterminate = checkedCount > 0 && checkedCount < all.length;
+
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const count = selectedIds.size;
+  if (count === 0) {
+    bar.style.display = 'none';
+  } else {
+    bar.style.display = 'flex';
+    document.getElementById('bulk-count').textContent = `${count}件選択中`;
+  }
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─ ダッシュボードカードフィルター ──────────────
+document.querySelectorAll('.dash-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const f = card.dataset.filter;
+    statusFilter = statusFilter === f ? '' : f;
+    document.querySelectorAll('.dash-card').forEach(c => c.style.outline = '');
+    if (statusFilter) card.style.outline = '3px solid var(--accent)';
+    updateTable();
+  });
+});
+
+// ─ ロケーションフィルター ──────────────────────
+document.getElementById('location-filter').addEventListener('change', updateTable);
+
+// ─ ソート ────────────────────────────────────
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    if (sortKey === key) sortAsc = !sortAsc;
+    else { sortKey = key; sortAsc = true; }
+    updateTable();
+  });
+});
+
+// ─ 品目追加・編集モーダル ────────────────────────
+function openAdd() {
+  document.getElementById('item-modal-title').textContent = '品目追加';
+  document.getElementById('item-id').value = '';
+  document.getElementById('item-name').value = '';
+  document.getElementById('item-category').value = '水';
+  document.getElementById('item-unit-qty').value = '';
+  document.getElementById('item-boxes').value = '';
+  document.getElementById('item-loose').value = '';
+  document.getElementById('item-stock-display').value = '';
+  document.getElementById('item-required').value = '';
+  document.getElementById('item-unit').value = '';
+  document.getElementById('item-expiry').value = '';
+  document.getElementById('item-memo').value = '';
+  updateLocationSelect();
+  showModal('item-modal');
+}
+
+function openEdit(id) {
+  const item = data.items.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('item-modal-title').textContent = '品目編集';
+  document.getElementById('item-id').value = item.id;
+  document.getElementById('item-name').value = item.name || '';
+  document.getElementById('item-category').value = item.category || '水';
+  document.getElementById('item-unit-qty').value = item.unitQty ?? '';
+  document.getElementById('item-boxes').value = item.boxes ?? '';
+  document.getElementById('item-loose').value = item.loose ?? '';
+  document.getElementById('item-stock-display').value = calcStock(item);
+  document.getElementById('item-required').value = item.required ?? '';
+  document.getElementById('item-unit').value = item.unit || '';
+  document.getElementById('item-expiry').value = item.expiry || '';
+  document.getElementById('item-memo').value = item.memo || '';
+  updateLocationSelect(item.location);
+  showModal('item-modal');
+}
+
+function updateLocationSelect(selected) {
+  const sel = document.getElementById('item-location');
+  sel.innerHTML = '';
+  (data.locations || ['本社']).forEach(loc => {
+    const opt = document.createElement('option');
+    opt.value = loc; opt.textContent = loc;
+    if (loc === selected) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+document.getElementById('btn-add').addEventListener('click', openAdd);
+
+// 総数量のリアルタイム自動計算
+function updateStockDisplay() {
+  const unitQty = Number(document.getElementById('item-unit-qty').value) || 0;
+  const boxes   = Number(document.getElementById('item-boxes').value)   || 0;
+  const loose   = Number(document.getElementById('item-loose').value)   || 0;
+  document.getElementById('item-stock-display').value = unitQty * boxes + loose;
+}
+['item-unit-qty', 'item-boxes', 'item-loose'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateStockDisplay);
+});
+
+document.getElementById('item-save').addEventListener('click', async () => {
+  const name = document.getElementById('item-name').value.trim();
+  if (!name) { showToast('品名を入力してください', 'error'); return; }
+
+  const id = document.getElementById('item-id').value;
+  const item = {
+    id: id || crypto.randomUUID(),
+    name,
+    category: document.getElementById('item-category').value,
+    location: document.getElementById('item-location').value,
+    unitQty: Number(document.getElementById('item-unit-qty').value) || 0,
+    boxes:   Number(document.getElementById('item-boxes').value)   || 0,
+    loose:   Number(document.getElementById('item-loose').value)   || 0,
+    required: Number(document.getElementById('item-required').value) || 0,
+    unit: document.getElementById('item-unit').value.trim(),
+    expiry: document.getElementById('item-expiry').value,
+    memo: document.getElementById('item-memo').value.trim(),
+  };
+
+  if (id) {
+    const idx = data.items.findIndex(i => i.id === id);
+    if (idx >= 0) data.items[idx] = item;
+  } else {
+    data.items.push(item);
+  }
+
+  await saveData();
+  closeModal('item-modal');
+  render();
+  showToast(id ? '品目を更新しました' : '品目を追加しました', 'success');
+});
+
+// ─ 削除 ──────────────────────────────────────
+function openDelete(id) {
+  const item = data.items.find(i => i.id === id);
+  if (!item) return;
+  deleteTargetId = id;
+  document.getElementById('delete-item-name').textContent = item.name;
+  showModal('delete-modal');
+}
+
+// ─ 削除確認（単体・一括共用） ────────────────────
+document.getElementById('delete-confirm').addEventListener('click', async () => {
+  if (deleteTargetId === null) {
+    // 一括削除
+    const count = selectedIds.size;
+    data.items = data.items.filter(i => !selectedIds.has(i.id));
+    selectedIds.clear();
+    await saveData();
+    closeModal('delete-modal');
+    render();
+    showToast(`${count}件を削除しました`, 'success');
+  } else {
+    // 単体削除
+    data.items = data.items.filter(i => i.id !== deleteTargetId);
+    selectedIds.delete(deleteTargetId);
+    await saveData();
+    closeModal('delete-modal');
+    render();
+    showToast('削除しました', 'success');
+  }
+});
+
+// ─ 一括削除 ──────────────────────────────────
+// tbody のチェックボックス変更を追跡
+document.getElementById('items-tbody').addEventListener('change', e => {
+  if (!e.target.classList.contains('row-check')) return;
+  const id = e.target.dataset.id;
+  if (e.target.checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  updateBulkBar();
+
+  const all = document.querySelectorAll('.row-check');
+  const selectAll = document.getElementById('select-all');
+  const checkedCount = [...all].filter(c => c.checked).length;
+  selectAll.checked = checkedCount === all.length;
+  selectAll.indeterminate = checkedCount > 0 && checkedCount < all.length;
+});
+
+// 全選択チェックボックス
+document.getElementById('select-all').addEventListener('change', e => {
+  document.querySelectorAll('.row-check').forEach(cb => {
+    cb.checked = e.target.checked;
+    if (e.target.checked) selectedIds.add(cb.dataset.id);
+    else selectedIds.delete(cb.dataset.id);
+  });
+  updateBulkBar();
+});
+
+// 選択解除ボタン
+document.getElementById('btn-bulk-cancel').addEventListener('click', () => {
+  selectedIds.clear();
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+  const selectAll = document.getElementById('select-all');
+  selectAll.checked = false;
+  selectAll.indeterminate = false;
+  updateBulkBar();
+});
+
+// 一括削除ボタン → 確認ダイアログ表示
+document.getElementById('btn-bulk-delete').addEventListener('click', () => {
+  if (selectedIds.size === 0) return;
+  document.getElementById('delete-item-name').textContent = `選択した ${selectedIds.size} 件`;
+  deleteTargetId = null; // nullで一括モードと判定
+  showModal('delete-modal');
+});
+
+// ─ 設定モーダル ──────────────────────────────
+document.getElementById('btn-settings').addEventListener('click', () => {
+  renderContactsForm();
+  renderLocationTags();
+  document.getElementById('alert-days').value = data.alertDays || 90;
+  showModal('settings-modal');
+});
+
+function renderContactsForm() {
+  const contacts = data.contacts || [];
+  let html = '';
+  for (let i = 0; i < 3; i++) {
+    const c = contacts[i] || { name: '', email: '' };
+    html += `<div class="contact-row">
+      <input class="form-input" placeholder="担当者名 ${i+1}" data-ci="${i}" data-field="name" value="${esc(c.name)}">
+      <input class="form-input" type="email" placeholder="メールアドレス" data-ci="${i}" data-field="email" value="${esc(c.email)}">
+    </div>`;
+  }
+  document.getElementById('contacts-form').innerHTML = html;
+}
+
+function renderLocationTags() {
+  const tags = document.getElementById('location-tags');
+  tags.innerHTML = (data.locations || []).map(loc =>
+    `<span class="location-tag">${esc(loc)}<button onclick="removeLocation('${esc(loc)}')">×</button></span>`
+  ).join('');
+}
+
+function removeLocation(loc) {
+  data.locations = (data.locations || []).filter(l => l !== loc);
+  renderLocationTags();
+}
+
+document.getElementById('btn-add-location').addEventListener('click', () => {
+  const input = document.getElementById('location-new-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (data.locations.includes(val)) { showToast('既に登録されています', 'error'); return; }
+  data.locations.push(val);
+  input.value = '';
+  renderLocationTags();
+});
+
+document.getElementById('location-new-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-add-location').click(); }
+});
+
+document.getElementById('settings-save').addEventListener('click', async () => {
+  // 担当者収集
+  const contacts = [];
+  document.querySelectorAll('#contacts-form input[data-ci]').forEach(inp => {
+    const i = Number(inp.dataset.ci);
+    if (!contacts[i]) contacts[i] = { name: '', email: '' };
+    contacts[i][inp.dataset.field] = inp.value.trim();
+  });
+  data.contacts = contacts.filter(c => c.name || c.email);
+  data.alertDays = Number(document.getElementById('alert-days').value) || 90;
+
+  await saveData();
+  closeModal('settings-modal');
+  render();
+  showToast('設定を保存しました', 'success');
+});
+
+// ─ CSVエクスポート ────────────────────────────
+document.getElementById('btn-export').addEventListener('click', () => {
+  const headers = ['品名','カテゴリ','拠点','単位','1箱入数','箱数','バラ数','総数量','必要数','使用期限','状態','メモ'];
+  const rows = data.items.map(item => {
+    const s = getStatus(item.expiry);
+    const stLabel = s === 'expired' ? '期限切れ' : s === 'warning' ? '要確認' : '正常';
+    return [item.name, item.category, item.location, item.unit,
+            item.unitQty ?? '', item.boxes ?? '', item.loose ?? '', calcStock(item),
+            item.required, item.expiry, stLabel, item.memo]
+      .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`);
+  });
+  const csv = '﻿' + [headers, ...rows].map(r => r.join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `備蓄品リスト_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('CSVをエクスポートしました', 'success');
+});
+
+// ─ CSVインポート ──────────────────────────────
+document.getElementById('btn-import').addEventListener('click', () => {
+  document.getElementById('csv-file-input').value = '';
+  document.getElementById('csv-file-input').click();
+});
+
+document.getElementById('csv-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    try {
+      // BOMを検出してエンコーディングを自動判定（UTF-8/UTF-16/Shift-JIS対応）
+      const bytes = new Uint8Array(ev.target.result);
+      let text;
+      if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+        // UTF-8 BOM
+        text = new TextDecoder('utf-8').decode(bytes.slice(3));
+      } else if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
+        // UTF-16 LE BOM（ExcelのUnicode CSV保存）
+        text = new TextDecoder('utf-16le').decode(bytes.slice(2));
+      } else if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
+        // UTF-16 BE BOM
+        text = new TextDecoder('utf-16be').decode(bytes.slice(2));
+      } else {
+        // BOMなし：UTF-8を試みてダメならShift-JIS
+        try {
+          text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        } catch {
+          text = new TextDecoder('shift-jis').decode(bytes);
+        }
+      }
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { showToast('データが空です', 'error'); return; }
+
+      // ヘッダー行を読んでカラム位置を判定
+      const headers = parseCSVLine(lines[0]);
+      const idx = {
+        name:     headers.indexOf('品名'),
+        category: headers.indexOf('カテゴリ'),
+        location: headers.indexOf('拠点'),
+        unit:     headers.indexOf('単位'),
+        unitQty:  headers.indexOf('1箱入数'),
+        boxes:    headers.indexOf('箱数'),
+        loose:    headers.indexOf('バラ数'),
+        required: headers.indexOf('必要数'),
+        expiry:   headers.indexOf('使用期限'),
+        memo:     headers.indexOf('メモ'),
+      };
+
+      if (idx.name === -1) {
+        showToast('「品名」列が見つかりません', 'error');
+        return;
+      }
+
+      const added = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (!cols[idx.name]) continue; // 品名が空の行はスキップ
+
+        // 使用期限：YYYY-MM-DD 形式に正規化（ゼロ埋めなし・スラッシュ区切りにも対応）
+        let expiry = idx.expiry >= 0 ? (cols[idx.expiry] || '').trim() : '';
+        if (expiry && expiry !== '-') {
+          expiry = expiry.replace(/\//g, '-');
+          // 月・日が1桁の場合はゼロ埋め（例：2031-5-1 → 2031-05-01）
+          expiry = expiry.replace(/^(\d{4})-(\d{1,2})-(\d{1,2})$/, (_, y, m, d) =>
+            `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`
+          );
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(expiry)) expiry = '';
+        } else {
+          expiry = '';
+        }
+
+        // カテゴリ：システム外の値は「その他」に自動変換
+        const VALID_CATS = ['水','食料','トイレ','衛生','電源・照明','その他'];
+        const rawCat = idx.category >= 0 ? (cols[idx.category] || '').trim() : '';
+        const category = VALID_CATS.includes(rawCat) ? rawCat : 'その他';
+
+        added.push({
+          id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + i,
+          name:     (cols[idx.name] || '').trim(),
+          category,
+          location: idx.location >= 0 ? (cols[idx.location] || data.locations[0]).trim() : data.locations[0],
+          unit:     idx.unit >= 0 ? (cols[idx.unit] || '個').trim() : '個',
+          unitQty:  idx.unitQty >= 0 ? (parseInt(cols[idx.unitQty]) || 0) : 0,
+          boxes:    idx.boxes >= 0 ? (parseInt(cols[idx.boxes]) || 0) : 0,
+          loose:    idx.loose >= 0 ? (parseInt(cols[idx.loose]) || 0) : 0,
+          required: idx.required >= 0 ? (parseInt(cols[idx.required]) || 0) : 0,
+          expiry,
+          memo:     idx.memo >= 0 ? (cols[idx.memo] || '').trim() : '',
+        });
+      }
+
+      if (added.length === 0) { showToast('取り込める品目がありませんでした', 'error'); return; }
+
+      // 既存データに追記して保存（items が未初期化の場合も考慮）
+      data.items = [...(data.items || []), ...added];
+      await api('POST', API_DATA, data);
+      render();
+      showToast(`${added.length}件の品目を取り込みました`, 'success');
+    } catch (err) {
+      showToast('CSVの読み込みに失敗しました: ' + err.message, 'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+// CSV1行をパース（ダブルクォート対応）
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') { inQ = false; }
+      else { cur += ch; }
+    } else {
+      if (ch === '"') { inQ = true; }
+      else if (ch === ',') { result.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ─ アラートメール送信 ──────────────────────────
+document.getElementById('btn-send-alert').addEventListener('click', async () => {
+  if (data.contacts.length === 0) {
+    showToast('担当者が未登録です。設定から追加してください', 'error');
+    return;
+  }
+  const alertItems = data.items.filter(item => getStatus(item.expiry) !== 'ok');
+  if (alertItems.length === 0) {
+    showToast('アラート対象の品目はありません', 'success');
+    return;
+  }
+  const btn = document.getElementById('btn-send-alert');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+  try {
+    await api('POST', API_ALERT);
+    showToast(`${alertItems.length}件のアラートメールを送信しました`, 'success');
+  } catch (err) {
+    showToast('送信に失敗しました: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📧 アラートメール送信';
+  }
+});
+
+// ─ データ保存 ─────────────────────────────────
+async function saveData() {
+  await api('POST', API_DATA, data);
+}
+
+// ─ モーダル制御 ──────────────────────────────
+function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// ─ トースト ──────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type ? `show ${type}` : 'show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// ─ 起動 ──────────────────────────────────────
+init();
+</script>
+</body>
+</html>

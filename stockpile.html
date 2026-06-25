@@ -76,9 +76,9 @@ body {
   z-index: 1;
 }
 .login-card {
-  background: rgba(255,255,255,.97);
-  border-radius: 20px;
-  box-shadow: 0 24px 80px rgba(0,0,0,.13), 0 4px 20px rgba(0,0,0,.07);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
   padding: 52px 52px 44px;
   width: 500px;
   max-width: 100%;
@@ -588,10 +588,6 @@ tr.row-warning td { background: #fffdf0; }
 
 <!-- ログイン画面 -->
 <div id="login-screen">
-  <!-- 左上ロゴ -->
-  <div class="login-topbar">
-    <img src="/bcp-check/resilab_logo.png" alt="レジリエンスラボ">
-  </div>
 
   <!-- ログインカード -->
   <div class="login-main">
@@ -602,7 +598,10 @@ tr.row-warning td { background: #fffdf0; }
         <img src="/bcp-check/stockpile_icon.png" alt="備蓄品管理" style="width:110px;height:auto">
       </div>
 
-      <div class="login-title">備蓄品管理システム</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;">
+        <img src="/bcp-check/resilab_favicon.png" alt="レジリエンスラボ" style="height:32px;width:auto;">
+        <div class="login-title" style="margin-bottom:0;">備蓄品管理システム</div>
+      </div>
       <div class="login-sub">備蓄品を一元管理し、安心・安全な未来を支えます</div>
 
       <!-- 区切り（シールド） -->
@@ -658,57 +657,6 @@ tr.row-warning td { background: #fffdf0; }
         </svg>
         このシステムは <a href="https://resilab-jpn.com/" target="_blank" rel="noopener">株式会社レジリエンスラボ</a> が提供しています
       </div>
-    </div>
-  </div>
-
-  <!-- フィーチャーストリップ -->
-  <div class="login-features">
-    <!-- 備蓄品一元管理：段ボール箱（3Dアイソメトリック） -->
-    <div class="login-feature">
-      <div class="login-feature-icon">
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 4 L32 12 L18 20 L4 12 Z" fill="#fef3c7" stroke="#8b1a2e" stroke-width="2.2" stroke-linejoin="round"/>
-          <path d="M4 12 V24 L18 32 V20 Z" fill="#f0d98a" stroke="#8b1a2e" stroke-width="2.2" stroke-linejoin="round"/>
-          <path d="M32 12 V24 L18 32 V20 Z" fill="#fef3c7" stroke="#8b1a2e" stroke-width="2.2" stroke-linejoin="round"/>
-          <line x1="18" y1="4" x2="18" y2="20" stroke="#8b1a2e" stroke-width="1.5"/>
-          <line x1="4" y1="12" x2="32" y2="12" stroke="#8b1a2e" stroke-width="1.5"/>
-        </svg>
-      </div>
-      <div class="login-feature-title">備蓄品の一元管理</div>
-      <div class="login-feature-desc">在庫状況をリアルタイムで把握</div>
-    </div>
-    <!-- 期限管理：クリップボード＋時計 -->
-    <div class="login-feature">
-      <div class="login-feature-icon">
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="7" width="20" height="26" rx="3" fill="#fff" stroke="#8b1a2e" stroke-width="2.2"/>
-          <rect x="11" y="3.5" width="6" height="6" rx="2" fill="#8b1a2e"/>
-          <path d="M9 17 l2.5 2.5 4-4" stroke="#8b1a2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="18" y1="18.5" x2="22" y2="18.5" stroke="#8b1a2e" stroke-width="2" stroke-linecap="round"/>
-          <path d="M9 23.5 l2.5 2.5 4-4" stroke="#8b1a2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="18" y1="25" x2="22" y2="25" stroke="#ccc" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="28" cy="28" r="7.5" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
-          <path d="M28 23.5 V28 L31 30" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="login-feature-title">期限・点検管理</div>
-      <div class="login-feature-desc">期限切れを防ぎ、点検をサポート</div>
-    </div>
-    <!-- BCP支援：ビル＋シールド -->
-    <div class="login-feature">
-      <div class="login-feature-icon">
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="7" width="22" height="28" rx="2.5" fill="#e8e8e8" stroke="#888" stroke-width="2.2"/>
-          <rect x="3" y="7" width="22" height="8" rx="2.5" fill="#888"/>
-          <rect x="7" y="19" width="5" height="6" rx="1.2" fill="#aaa"/>
-          <rect x="14" y="19" width="5" height="6" rx="1.2" fill="#aaa"/>
-          <rect x="7" y="27" width="5" height="6" rx="1.2" fill="#aaa"/>
-          <path d="M23 19 L31 22 V28 C31 32 27.5 34.5 27 35 C26.5 34.5 23 32 23 28 V22 Z" fill="#fdf5f6" stroke="#8b1a2e" stroke-width="2.2" stroke-linejoin="round"/>
-          <path d="M25 28 l2.2 2.2 4.5-4.5" stroke="#8b1a2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="login-feature-title">安心の備えをサポート</div>
-      <div class="login-feature-desc">BCP・防災対策を強力に支援</div>
     </div>
   </div>
 

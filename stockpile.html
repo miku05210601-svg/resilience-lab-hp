@@ -1164,7 +1164,7 @@ function renderLocDashboard() {
   container.innerHTML = locations.map(loc => {
     const items = data.items.filter(it => it.location === loc);
     let expired = 0, warning = 0, shortage = 0;
-    let foodTotal = 0, waterTotal = 0;
+    let foodTotal = 0, waterTotal = 0, toiletTotal = 0;
 
     items.forEach(it => {
       const s = getStatus(it.expiry);
@@ -1176,7 +1176,11 @@ function renderLocDashboard() {
       if (it.unit === '食') foodTotal += stock;
       // 水（単位が「本」でカテゴリが水 → 500ml換算）
       if (it.category === '水' && it.unit === '本') waterTotal += stock * 0.5;
+      // トイレ（台・基の設置型を合計）
+      if (it.category === 'トイレ' && (it.unit === '台' || it.unit === '基')) toiletTotal += stock;
     });
+
+    const pop = (data.calcSettings?.populations?.[loc]) || 0;
 
     const district  = getDistrict(loc);
     const color     = DISTRICT_COLORS[district] || '#64748b';
@@ -1188,6 +1192,11 @@ function renderLocDashboard() {
     return `<div class="loc-card" style="border-color:${alertBorder};border-top:3px solid ${color}" onclick="selectLocation('${esc(loc)}')">
       <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:4px;letter-spacing:.03em">${esc(district)}</div>
       <div class="loc-name">${esc(shortName)}</div>
+      <div style="display:inline-flex;align-items:center;gap:4px;margin-bottom:9px;background:var(--bg);border-radius:5px;padding:3px 8px">
+        <span style="font-size:10px;color:var(--muted)">想定</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${pop > 0 ? pop.toLocaleString() : '—'}</span>
+        ${pop > 0 ? '<span style="font-size:10px;color:var(--muted)">人</span>' : ''}
+      </div>
       <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
           <span style="font-size:11px;color:var(--muted)">🍱 食料</span>
@@ -1196,6 +1205,10 @@ function renderLocDashboard() {
         <div style="display:flex;justify-content:space-between;align-items:baseline">
           <span style="font-size:11px;color:var(--muted)">💧 水</span>
           <span style="font-size:15px;font-weight:800;color:var(--text)">${waterTotal.toLocaleString()}<span style="font-size:10px;font-weight:500;color:var(--muted);margin-left:1px">L</span></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:11px;color:var(--muted)">🚽 トイレ</span>
+          <span style="font-size:15px;font-weight:800;color:var(--text)">${toiletTotal}<span style="font-size:10px;font-weight:500;color:var(--muted);margin-left:1px">台</span></span>
         </div>
       </div>
       <div class="loc-stats">

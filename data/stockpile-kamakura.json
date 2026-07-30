@@ -25378,6 +25378,19 @@
       "required": 2,
       "expiry": "",
       "memo": ""
+    },
+    {
+      "id": "bee2cdf8-9f36-42b2-af7f-f47b64deb9e4",
+      "name": "テスト",
+      "category": "水",
+      "location": "第一小学校（鎌倉地域）",
+      "unitQty": 1,
+      "boxes": 1,
+      "loose": 0,
+      "required": 1,
+      "unit": "本",
+      "expiry": "2026-08-28",
+      "memo": ""
     }
   ],
   "calcSettings": {

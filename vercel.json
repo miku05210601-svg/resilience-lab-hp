@@ -23,7 +23,8 @@
     { "src": "bcp-check/bcp_illust.svg", "use": "@vercel/static" },
     { "src": "bcp-check/stockpile_icon.png", "use": "@vercel/static" },
     { "src": "bcp-check/resilab_favicon.png", "use": "@vercel/static" },
-    { "src": "bcp-check/resilab_logo2.png", "use": "@vercel/static" }
+    { "src": "bcp-check/resilab_logo2.png", "use": "@vercel/static" },
+    { "src": "stockpile-terms.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/chat", "dest": "/api/chat.js" },
@@ -52,6 +53,8 @@
     { "src": "/bcp-check/resilab_logo2.png", "dest": "/bcp-check/resilab_logo2.png" },
     { "src": "/bcp-check", "dest": "/bcp-check/index.html" },
     { "src": "/bcp-check/", "dest": "/bcp-check/index.html" },
+    { "src": "/stockpile-terms", "dest": "/stockpile-terms.html" },
+    { "src": "/stockpile-terms/", "dest": "/stockpile-terms.html" },
     { "src": "/", "dest": "/index.html" }
   ],
   "crons": [

@@ -25447,103 +25447,128 @@
   "emergencyData": {
     "第一小学校（鎌倉地域）": {
       "currentEvacuees": 70,
-      "capacity": 100
+      "capacity": 100,
+      "status": "unopened"
     },
     "第二小学校（鎌倉地域）": {
       "currentEvacuees": 90,
-      "capacity": 100
+      "capacity": 100,
+      "status": "unopened"
     },
     "稲村ケ崎小学校（鎌倉地域）": {
       "currentEvacuees": 30,
-      "capacity": 100
+      "capacity": 100,
+      "status": "open"
     },
     "第一中学校（鎌倉地域）": {
       "currentEvacuees": 80,
-      "capacity": 100
+      "capacity": 100,
+      "status": "unopened"
     },
     "御成中学校（鎌倉地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "御成小学校（鎌倉地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "第二中学校（鎌倉地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "腰越小学校（腰越地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "西鎌倉小学校（腰越地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "七里ガ浜小学校（腰越地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "腰越中学校（腰越地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "深沢小学校（深沢地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "山崎小学校（深沢地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "富士塚小学校（深沢地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "深沢中学校（深沢地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "手広中学校（深沢地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "小坂小学校（大船地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "大船小学校（大船地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "今泉小学校（大船地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "大船中学校（大船地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "岩瀬中学校（大船地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "玉縄小学校（玉縄地域）": {
       "currentEvacuees": 130,
-      "capacity": 100
+      "capacity": 100,
+      "status": "unopened"
     },
     "関谷小学校（玉縄地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "植木小学校（玉縄地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     },
     "玉縄中学校（玉縄地域）": {
       "currentEvacuees": 0,
-      "capacity": 0
+      "capacity": 0,
+      "status": "unopened"
     }
   }
 }

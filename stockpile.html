@@ -536,6 +536,13 @@ tr.row-warning td { background: #fffdf0; }
 .contact-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; align-items: center; }
 .contact-num { font-size: 12px; font-weight: 700; color: var(--muted); text-align: center; }
 .location-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+/* 必要数計算設定 */
+.calc-table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:6px; }
+.calc-table th { text-align:left; padding:6px 8px; color:var(--muted); font-weight:600; font-size:11px; border-bottom:1px solid var(--border); }
+.calc-table td { padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.calc-table input[type=number] { width:64px; padding:4px 6px; background:var(--bg); border:1px solid var(--border); border-radius:5px; color:var(--text); font-size:13px; text-align:right; }
+.pop-table-wrap { max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:6px; }
+.calc-hint { font-size:11px; color:var(--muted); }
 .location-tag {
   background: var(--accent-tint);
   color: var(--accent);
@@ -883,6 +890,28 @@ tr.row-warning td { background: #fffdf0; }
           <input class="form-input" type="number" id="alert-days" style="width:100px" min="1" max="365">
           <span style="color:var(--muted);font-size:13px">日以内を⚠警告として表示</span>
         </div>
+      </div>
+      <!-- 必要数自動計算 -->
+      <div class="settings-section">
+        <div class="settings-section-title">📊 必要数自動計算</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:13px;color:var(--muted)">想定待機日数</span>
+          <input class="form-input" type="number" id="calc-stay-days" style="width:80px" min="1" max="30" value="3">
+          <span style="font-size:13px;color:var(--muted)">日</span>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">計算ルール（1人1日あたり）</div>
+        <table class="calc-table" id="calc-rules-table">
+          <thead><tr><th>対象</th><th>単位</th><th>カテゴリ</th><th style="text-align:right">1人/日</th></tr></thead>
+          <tbody id="calc-rules-body"></tbody>
+        </table>
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 8px">拠点別　想定避難人数</div>
+        <div class="pop-table-wrap">
+          <table class="calc-table">
+            <thead><tr><th>拠点名</th><th style="text-align:right">人数</th></tr></thead>
+            <tbody id="calc-pop-body"></tbody>
+          </table>
+        </div>
+        <button class="btn-primary" id="btn-recalc" style="margin-top:14px;width:100%">🔄 必要数を一括再計算</button>
       </div>
     </div>
     <div class="modal-footer">
@@ -1495,11 +1524,96 @@ document.getElementById('btn-bulk-delete').addEventListener('click', () => {
   showModal('delete-modal');
 });
 
+// ─ 必要数自動計算 ────────────────────────────
+const DEFAULT_CALC_RULES = [
+  { key:'food',   label:'食料',       matchUnit:'食',  matchCategory:'',       perPersonPerDay:3,  hint:'1人1日3食' },
+  { key:'water',  label:'飲料水(500ml)',matchUnit:'本', matchCategory:'水',     perPersonPerDay:4,  hint:'1人1日2L=4本' },
+  { key:'toilet', label:'トイレ用品', matchUnit:'個',  matchCategory:'トイレ', perPersonPerDay:5,  hint:'1人1日5回' },
+  { key:'mask',   label:'衛生用品',   matchUnit:'枚',  matchCategory:'衛生',   perPersonPerDay:2,  hint:'マスク等1日2枚' },
+];
+
+function initCalcSettings() {
+  if (!data.calcSettings) {
+    data.calcSettings = { stayDays:3, rules:[...DEFAULT_CALC_RULES], locationPopulations:{} };
+  }
+  if (!data.calcSettings.rules) data.calcSettings.rules = [...DEFAULT_CALC_RULES];
+  if (!data.calcSettings.locationPopulations) data.calcSettings.locationPopulations = {};
+}
+
+function renderCalcSettingsForm() {
+  initCalcSettings();
+  const cs = data.calcSettings;
+  document.getElementById('calc-stay-days').value = cs.stayDays ?? 3;
+
+  // 計算ルール
+  const rules = cs.rules.length ? cs.rules : DEFAULT_CALC_RULES;
+  document.getElementById('calc-rules-body').innerHTML = rules.map((r, i) =>
+    `<tr>
+      <td>${esc(r.label)}<br><span class="calc-hint">${esc(r.hint||'')}</span></td>
+      <td>${esc(r.matchUnit)}</td>
+      <td style="color:var(--muted)">${esc(r.matchCategory||'全て')}</td>
+      <td style="text-align:right">
+        <input type="number" min="0" max="999" step="0.5"
+          data-rule-idx="${i}" value="${r.perPersonPerDay}" style="width:64px">
+      </td>
+    </tr>`
+  ).join('');
+
+  // 拠点別人数
+  const pops = cs.locationPopulations;
+  document.getElementById('calc-pop-body').innerHTML = (data.locations||[]).map(loc =>
+    `<tr>
+      <td style="font-size:12px">${esc(loc)}</td>
+      <td style="text-align:right">
+        <input type="number" min="0" max="9999"
+          data-loc="${esc(loc)}" value="${pops[loc]||''}" placeholder="未設定" style="width:72px">
+      </td>
+    </tr>`
+  ).join('');
+}
+
+function collectCalcSettings() {
+  initCalcSettings();
+  data.calcSettings.stayDays = Number(document.getElementById('calc-stay-days').value) || 3;
+  document.querySelectorAll('#calc-rules-body input[data-rule-idx]').forEach(inp => {
+    data.calcSettings.rules[Number(inp.dataset.ruleIdx)].perPersonPerDay = Number(inp.value) || 0;
+  });
+  document.querySelectorAll('#calc-pop-body input[data-loc]').forEach(inp => {
+    const loc = inp.dataset.loc;
+    const v = Number(inp.value);
+    if (v > 0) data.calcSettings.locationPopulations[loc] = v;
+    else delete data.calcSettings.locationPopulations[loc];
+  });
+}
+
+document.getElementById('btn-recalc').addEventListener('click', async () => {
+  collectCalcSettings();
+  const cs = data.calcSettings;
+  const stayDays = cs.stayDays || 3;
+  let updated = 0;
+  data.items = data.items.map(item => {
+    const pop = cs.locationPopulations[item.location];
+    if (!pop) return item;
+    const rule = cs.rules.find(r =>
+      r.matchUnit === item.unit &&
+      (!r.matchCategory || r.matchCategory === item.category)
+    );
+    if (!rule) return item;
+    const newRequired = Math.ceil(pop * rule.perPersonPerDay * stayDays);
+    updated++;
+    return { ...item, required: newRequired };
+  });
+  await saveData();
+  render();
+  showToast(`${updated}件の必要数を再計算しました`, 'success');
+});
+
 // ─ 設定モーダル ──────────────────────────────
 document.getElementById('btn-settings').addEventListener('click', () => {
   renderContactsForm();
   renderLocationTags();
   document.getElementById('alert-days').value = data.alertDays || 90;
+  renderCalcSettingsForm();
   showModal('settings-modal');
 });
 
@@ -1552,6 +1666,7 @@ document.getElementById('settings-save').addEventListener('click', async () => {
   });
   data.contacts = contacts.filter(c => c.name || c.email);
   data.alertDays = Number(document.getElementById('alert-days').value) || 90;
+  collectCalcSettings();
 
   await saveData();
   closeModal('settings-modal');

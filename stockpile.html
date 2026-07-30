@@ -754,8 +754,8 @@ tr.row-warning td { background: #fffdf0; }
       <button class="mode-btn mode-btn-emg" id="btn-mode-emg" onclick="setMode('emergency')">🚨 有事</button>
     </div>
     <div class="view-toggle" id="view-toggle-wrap">
-      <button class="view-btn active" id="btn-view-list" onclick="switchView('list')">≡ 一覧</button>
-      <button class="view-btn" id="btn-view-loc" onclick="switchView('location')">⊞ 拠点別</button>
+      <button class="view-btn active" id="btn-view-loc" onclick="switchView('location')">⊞ 拠点別</button>
+      <button class="view-btn" id="btn-view-list" onclick="switchView('list')">≡ 一覧</button>
     </div>
     <button class="btn-icon" id="btn-settings">⚙ 設定</button>
     <button class="btn-logout" id="btn-logout">ログアウト</button>
@@ -1179,7 +1179,7 @@ function surplusLabel(stock, required, unit) {
 }
 
 // ─ ビュー切り替え ─────────────────────────────
-let currentView = 'list';
+let currentView = 'location';
 
 const DISTRICT_COLORS = {
   '鎌倉地域': '#22c55e',
@@ -1294,7 +1294,7 @@ function render() {
   updateDashboard();
   updateTable();
   document.getElementById('item-count').textContent = `全 ${data.items.length} 件`;
-  if (currentView === 'location') renderLocDashboard();
+  switchView(currentView);
 }
 
 function updateLocationFilter() {

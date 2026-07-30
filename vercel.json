@@ -60,7 +60,7 @@
   "crons": [
     {
       "path": "/api/cron/stockpile",
-      "schedule": "0 0 * * *"
+      "schedule": "0 0 * * 1"
     }
   ]
 }

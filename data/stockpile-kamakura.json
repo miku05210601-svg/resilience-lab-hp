@@ -25467,7 +25467,7 @@
     },
     "御成中学校（鎌倉地域）": {
       "currentEvacuees": 0,
-      "capacity": 0,
+      "capacity": 100,
       "status": "open"
     },
     "御成小学校（鎌倉地域）": {

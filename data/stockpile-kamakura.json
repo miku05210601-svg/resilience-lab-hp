@@ -25443,5 +25443,107 @@
       "植木小学校（玉縄地域）": 100,
       "玉縄中学校（玉縄地域）": 100
     }
+  },
+  "emergencyData": {
+    "第一小学校（鎌倉地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "第二小学校（鎌倉地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "稲村ケ崎小学校（鎌倉地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "第一中学校（鎌倉地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "御成中学校（鎌倉地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "御成小学校（鎌倉地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "第二中学校（鎌倉地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "腰越小学校（腰越地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "西鎌倉小学校（腰越地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "七里ガ浜小学校（腰越地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "腰越中学校（腰越地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "深沢小学校（深沢地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "山崎小学校（深沢地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "富士塚小学校（深沢地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "深沢中学校（深沢地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "手広中学校（深沢地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "小坂小学校（大船地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "大船小学校（大船地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "今泉小学校（大船地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "大船中学校（大船地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "岩瀬中学校（大船地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "玉縄小学校（玉縄地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "関谷小学校（玉縄地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "植木小学校（玉縄地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "玉縄中学校（玉縄地域）": {
+      "currentEvacuees": 0,
+      "capacity": 0
+    }
   }
 }

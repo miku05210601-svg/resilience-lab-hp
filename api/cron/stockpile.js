@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     for (const company of companies) {
       try {
         const { data } = await loadCompanyData(company.code);
-        const result = await sendAlertWithResend(data);
+        const result = await sendAlertWithResend(data, company.code);
         results.push({ company: company.code, ...result });
       } catch (err) {
         results.push({ company: company.code, error: err.message });

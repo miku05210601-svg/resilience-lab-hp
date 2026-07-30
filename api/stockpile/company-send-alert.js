@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
     }
 
     const { data } = await loadCompanyData(companyCode);
-    const result = await sendAlertWithResend(data);
+    const result = await sendAlertWithResend(data, companyCode);
     res.json({ ok: true, ...result });
   } catch (err) {
     console.error('company-send-alert エラー:', err.message);

@@ -36,7 +36,7 @@ function resendPost(payload) {
   });
 }
 
-async function sendAlertWithResend(data) {
+async function sendAlertWithResend(data, companyCode) {
   const alertItems = data.items.filter(item =>
     getStatus(item.expiry, data.alertDays) !== 'ok'
   );
@@ -87,6 +87,14 @@ async function sendAlertWithResend(data) {
           </thead>
           <tbody>${rows}</tbody>
         </table>
+        ${companyCode ? `
+        <div style="margin-top:24px;padding:16px;background:#f8f6f4;border-radius:6px;text-align:center">
+          <p style="margin:0 0 10px;color:#3d3d3d;font-size:14px">備蓄品管理システムで詳細を確認できます</p>
+          <a href="https://resilience-lab-hp.vercel.app/stockpile/${companyCode}"
+             style="display:inline-block;background:#8b1a2e;color:#fff;text-decoration:none;padding:10px 28px;border-radius:6px;font-size:14px;font-weight:600">
+            備蓄品管理システムを開く →
+          </a>
+        </div>` : ''}
         <p style="color:#888;font-size:12px;margin-top:20px">
           このメールは備蓄品管理システムから自動送信されています。
         </p>

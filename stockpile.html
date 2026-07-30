@@ -1246,8 +1246,11 @@ function updateLocationFilter() {
 }
 
 function updateDashboard() {
+  const locFilter = document.getElementById('location-filter').value;
   const counts = { expired: 0, warning: 0, ok: 0 };
-  data.items.forEach(item => counts[getStatus(item.expiry)]++);
+  data.items
+    .filter(item => !locFilter || item.location === locFilter)
+    .forEach(item => counts[getStatus(item.expiry)]++);
   document.getElementById('count-expired').textContent = counts.expired;
   document.getElementById('count-warning').textContent = counts.warning;
   document.getElementById('count-ok').textContent = counts.ok;

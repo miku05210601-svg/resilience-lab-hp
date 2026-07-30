@@ -1411,7 +1411,7 @@ document.querySelectorAll('.dash-card').forEach(card => {
 });
 
 // ─ ロケーションフィルター ──────────────────────
-document.getElementById('location-filter').addEventListener('change', updateTable);
+document.getElementById('location-filter').addEventListener('change', () => { updateDashboard(); updateTable(); });
 
 // ─ ソート ────────────────────────────────────
 document.querySelectorAll('th[data-sort]').forEach(th => {

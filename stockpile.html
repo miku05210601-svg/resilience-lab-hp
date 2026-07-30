@@ -738,13 +738,12 @@ tr.row-warning td { background: #fffdf0; }
   <div class="login-page-footer">© 2026 株式会社レジリエンスラボ All rights reserved.</div>
 </div>
 
-<!-- メイン画面 -->
-<div id="main-screen">
-  <!-- ヘッダー -->
+<!-- 共通ヘッダー（ログイン後常に表示） -->
+<div id="app-header-wrap" style="display:none">
   <header class="app-header">
     <div class="app-header-title" style="display:flex;align-items:center;gap:8px;"><img src="/bcp-check/resilab_icon.png" style="height:24px;width:auto;"> 備蓄品管理</div>
     <div class="header-spacer"></div>
-    <div class="header-filter">
+    <div class="header-filter" id="header-filter-wrap">
       <label>拠点</label>
       <select id="location-filter">
         <option value="">全て</option>
@@ -754,14 +753,18 @@ tr.row-warning td { background: #fffdf0; }
       <button class="mode-btn mode-btn-peace active" id="btn-mode-peace" onclick="setMode('peacetime')">🕊 平時</button>
       <button class="mode-btn mode-btn-emg" id="btn-mode-emg" onclick="setMode('emergency')">🚨 有事</button>
     </div>
-    <div class="view-toggle">
+    <div class="view-toggle" id="view-toggle-wrap">
       <button class="view-btn active" id="btn-view-list" onclick="switchView('list')">≡ 一覧</button>
       <button class="view-btn" id="btn-view-loc" onclick="switchView('location')">⊞ 拠点別</button>
     </div>
     <button class="btn-icon" id="btn-settings">⚙ 設定</button>
     <button class="btn-logout" id="btn-logout">ログアウト</button>
   </header>
+  <div class="emg-banner" id="emg-banner" style="display:none">🚨 有事モード — 災害対応中</div>
+</div>
 
+<!-- メイン画面 -->
+<div id="main-screen">
   <div class="container">
     <!-- ダッシュボード -->
     <div class="dashboard">
@@ -826,7 +829,6 @@ tr.row-warning td { background: #fffdf0; }
 
 <!-- 有事モード画面 -->
 <div id="emergency-screen" style="display:none">
-  <div class="emg-banner">🚨 有事モード — 災害対応中</div>
   <div class="container">
     <div id="emg-alert-panel" class="alert-panel" style="display:none"></div>
     <div id="emg-grid" class="emg-grid"></div>
@@ -1053,11 +1055,14 @@ async function init() {
 
 function showLogin() {
   document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-header-wrap').style.display = 'none';
   document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('emergency-screen').style.display = 'none';
 }
 
 function showMain() {
   document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-header-wrap').style.display = '';
   document.getElementById('main-screen').style.display = 'block';
   render();
 }
@@ -1943,13 +1948,13 @@ let appMode = 'peacetime';
 
 function setMode(mode) {
   appMode = mode;
-  document.getElementById('main-screen').style.display      = mode === 'peacetime' ? '' : 'none';
+  document.getElementById('main-screen').style.display      = mode === 'peacetime' ? 'block' : 'none';
   document.getElementById('emergency-screen').style.display = mode === 'emergency'  ? '' : 'none';
   document.getElementById('btn-mode-peace').className = 'mode-btn mode-btn-peace' + (mode === 'peacetime' ? ' active' : '');
   document.getElementById('btn-mode-emg').className   = 'mode-btn mode-btn-emg'   + (mode === 'emergency'  ? ' active' : '');
-  // 有事では一覧/拠点別ボタンを隠す
-  document.querySelector('.view-toggle').style.display      = mode === 'peacetime' ? '' : 'none';
-  document.querySelector('.header-filter').style.display    = mode === 'peacetime' ? '' : 'none';
+  document.getElementById('view-toggle-wrap').style.display   = mode === 'peacetime' ? '' : 'none';
+  document.getElementById('header-filter-wrap').style.display = mode === 'peacetime' ? '' : 'none';
+  document.getElementById('emg-banner').style.display         = mode === 'emergency'  ? '' : 'none';
   if (mode === 'emergency') renderEmergencyDashboard();
 }
 
@@ -1957,9 +1962,16 @@ function getEmgLoc(loc) {
   if (!data.emergencyData) data.emergencyData = {};
   if (!data.emergencyData[loc]) {
     data.emergencyData[loc] = {
+      status: 'unopened',
       currentEvacuees: 0,
       capacity: data.calcSettings?.populations?.[loc] || 0
     };
+  }
+  // 既存データにstatusがない場合は補完
+  if (!data.emergencyData[loc].status) data.emergencyData[loc].status = 'unopened';
+  // 収容数未設定の場合は想定避難者数をデフォルトに
+  if (!data.emergencyData[loc].capacity && data.calcSettings?.populations?.[loc]) {
+    data.emergencyData[loc].capacity = data.calcSettings.populations[loc];
   }
   return data.emergencyData[loc];
 }
@@ -1987,10 +1999,11 @@ function calcDaysRemaining(loc, evacuees) {
 function renderEmergencyDashboard() {
   const locs = data.locations || [];
 
-  // アラート収集・優先度ソート
+  // アラート収集（開設中のみ）・優先度ソート
   const alerts = [];
   locs.forEach(loc => {
     const e    = getEmgLoc(loc);
+    if (e.status !== 'open') return;
     const days = calcDaysRemaining(loc, e.currentEvacuees);
     const rate = e.capacity > 0 ? Math.round(e.currentEvacuees / e.capacity * 100) : 0;
     const issues = [];
@@ -2020,23 +2033,50 @@ function renderEmergencyDashboard() {
     panel.style.display = 'none';
   }
 
-  // 拠点カード
-  document.getElementById('emg-grid').innerHTML = locs.map((loc, idx) => {
+  // 状態定義
+  const STATUS_DEF = {
+    open:     { label: '開設中', color: '#16a34a', bg: '#f0fdf4' },
+    unopened: { label: '未開設', color: '#64748b', bg: '#f8fafc' },
+    closed:   { label: '閉鎖',   color: '#9ca3af', bg: '#f3f4f6' },
+  };
+
+  // 拠点カード（開設中→未開設→閉鎖の順で表示）
+  const sorted = [...locs].sort((a, b) => {
+    const order = { open: 0, unopened: 1, closed: 2 };
+    return (order[getEmgLoc(a).status] || 1) - (order[getEmgLoc(b).status] || 1);
+  });
+
+  document.getElementById('emg-grid').innerHTML = sorted.map((loc) => {
+    const idx       = locs.indexOf(loc);
     const e         = getEmgLoc(loc);
+    const st        = STATUS_DEF[e.status] || STATUS_DEF.unopened;
+    const isOpen    = e.status === 'open';
     const evac      = e.currentEvacuees;
     const cap       = e.capacity;
-    const rate      = cap > 0 ? Math.round(evac / cap * 100) : null;
+    const rate      = isOpen && cap > 0 ? Math.round(evac / cap * 100) : null;
     const rateColor = rate === null ? '#64748b' : rate >= 100 ? '#dc2626' : rate >= 80 ? '#d97706' : '#16a34a';
     const district  = getDistrict(loc);
     const color     = DISTRICT_COLORS[district] || '#64748b';
     const shortName = loc.replace(/（.+地域）/,'');
-    const days      = calcDaysRemaining(loc, evac);
+    const days      = isOpen ? calcDaysRemaining(loc, evac) : { food: null, water: null };
     const fColor    = days.food  === null ? 'var(--muted)' : days.food  < 1 ? '#dc2626' : days.food  < 3 ? '#d97706' : '#16a34a';
     const wColor    = days.water === null ? 'var(--muted)' : days.water < 1 ? '#dc2626' : days.water < 3 ? '#d97706' : '#16a34a';
+    const dimmed    = !isOpen ? 'opacity:.55;' : '';
 
-    return `<div class="emg-card" style="border-top:3px solid ${color}">
-      <div class="emg-card-district" style="color:${color}">${esc(district)}</div>
-      <div class="emg-card-name">${esc(shortName)}</div>
+    const statusBtns = Object.entries(STATUS_DEF).map(([key, def]) =>
+      `<button onclick="setEmgStatus(${idx},'${key}')" style="padding:3px 9px;font-size:11px;font-weight:600;border-radius:4px;border:1.5px solid ${e.status===key ? def.color : 'var(--border)'};background:${e.status===key ? def.bg : 'var(--surface)'};color:${e.status===key ? def.color : 'var(--muted)'};cursor:pointer">${def.label}</button>`
+    ).join('');
+
+    return `<div class="emg-card" style="border-top:3px solid ${color};${dimmed}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div>
+          <div class="emg-card-district" style="color:${color}">${esc(district)}</div>
+          <div class="emg-card-name" style="margin-bottom:0">${esc(shortName)}</div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${st.color};background:${st.bg};border:1px solid ${st.color};border-radius:12px;padding:2px 9px">${st.label}</span>
+      </div>
+      <div style="display:flex;gap:4px;margin-bottom:10px">${statusBtns}</div>
+      ${isOpen ? `
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <span style="font-size:11px;color:var(--muted)">現在の避難者</span>
         <span style="font-size:20px;font-weight:800;color:${rateColor}">${evac.toLocaleString()}<span style="font-size:11px;font-weight:500;color:var(--muted);margin-left:2px">人</span></span>
@@ -2048,7 +2088,7 @@ function renderEmergencyDashboard() {
       ${rate !== null ? `
       <div class="emg-occ-bar"><div class="emg-occ-fill" style="width:${Math.min(rate,100)}%;background:${rateColor}"></div></div>
       <div class="emg-occ-label" style="color:${rateColor}">収容率 ${rate}%</div>
-      ` : '<div style="height:14px"></div>'}
+      ` : '<div style="height:10px"></div>'}
       <div class="emg-days-grid">
         <div class="emg-days-cell">
           <div style="font-size:9px;color:var(--muted);margin-bottom:3px">🍱 食料</div>
@@ -2071,6 +2111,7 @@ function renderEmergencyDashboard() {
           <button class="emg-update-btn" onclick="saveEmgData(${idx})">更新</button>
         </div>
       </div>
+      ` : `<div style="font-size:12px;color:var(--muted);padding:10px 0">${e.status === 'closed' ? '閉鎖済み' : '開設されていません'}</div>`}
     </div>`;
   }).join('');
 }
@@ -2078,14 +2119,23 @@ function renderEmergencyDashboard() {
 function saveEmgData(idx) {
   const loc = (data.locations || [])[idx];
   if (!loc) return;
-  if (!data.emergencyData) data.emergencyData = {};
-  data.emergencyData[loc] = {
-    currentEvacuees: parseInt(document.getElementById('ei-' + idx)?.value) || 0,
-    capacity:        parseInt(document.getElementById('ec-' + idx)?.value) || 0
-  };
+  const e = getEmgLoc(loc);
+  e.currentEvacuees = parseInt(document.getElementById('ei-' + idx)?.value) || 0;
+  e.capacity        = parseInt(document.getElementById('ec-' + idx)?.value) || 0;
   saveData();
   renderEmergencyDashboard();
   showToast('更新しました');
+}
+
+function setEmgStatus(idx, status) {
+  const loc = (data.locations || [])[idx];
+  if (!loc) return;
+  const e = getEmgLoc(loc);
+  e.status = status;
+  saveData();
+  renderEmergencyDashboard();
+  const label = { open:'開設中', unopened:'未開設', closed:'閉鎖' }[status];
+  showToast(`${loc.replace(/（.+地域）/,'')}：${label}`);
 }
 
 // ─ 起動 ──────────────────────────────────────

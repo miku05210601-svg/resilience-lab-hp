@@ -12,5 +12,12 @@
     "passwordHash": "7e521d371c682f4a7c2b54005604302cb480566324b4738c0be269ed88d35ed0",
     "tokenHash": "b5e1718bb231f3a0a37eca31e4c62aaa782fd5be5aa4489d30fe2bfe295fe945",
     "created": "2026-06-11"
+  },
+  {
+    "code": "kamakura",
+    "name": "鎌倉市",
+    "passwordHash": "f3d0ad6329ef4afc3087c1a1799b6d898b5d7f301fdf04bdf49e701d7ae9d4b8",
+    "tokenHash": "810c704710a3a930391cfc7955684c78e6e667ad77a861f7c4d99c909703fa42",
+    "created": "2026-07-30"
   }
 ]

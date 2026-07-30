@@ -321,6 +321,26 @@ body {
 .dash-card.ok .dash-num { color: var(--green); }
 .dash-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
+/* ─ 拠点別ダッシュボード ─ */
+.view-toggle { display:flex; gap:5px; }
+.view-btn { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:5px 13px; font-size:13px; color:var(--muted); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.view-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.loc-dashboard { display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:14px; margin-bottom:24px; }
+.loc-card { background:var(--surface); border-radius:var(--radius); padding:15px; border:1.5px solid var(--border); cursor:pointer; transition:all .15s; }
+.loc-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 4px 16px rgba(124,58,237,.13); }
+.loc-name { font-size:12px; font-weight:700; color:var(--text); margin-bottom:11px; line-height:1.3; min-height:32px; }
+.loc-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin-bottom:10px; }
+.loc-stat { text-align:center; padding:5px 2px; background:var(--bg); border-radius:6px; }
+.loc-stat-num { font-size:17px; font-weight:800; line-height:1; }
+.loc-stat-label { font-size:9px; color:var(--muted); margin-top:2px; letter-spacing:-.01em; }
+.loc-stat.stat-expired .loc-stat-num { color:var(--red); }
+.loc-stat.stat-warning .loc-stat-num { color:var(--yellow); }
+.loc-stat.stat-shortage .loc-stat-num { color:var(--accent); }
+.loc-cat-bar { display:flex; height:5px; border-radius:3px; overflow:hidden; gap:1px; margin-bottom:7px; }
+.loc-cat-seg { border-radius:2px; min-width:3px; }
+.loc-item-count { font-size:11px; color:var(--muted); }
+@media (max-width:480px) { .loc-dashboard { grid-template-columns:repeat(2,1fr); } }
+
 /* ─ ツールバー ─ */
 .toolbar {
   display: flex;
@@ -690,6 +710,10 @@ tr.row-warning td { background: #fffdf0; }
         <option value="">全て</option>
       </select>
     </div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="btn-view-list" onclick="switchView('list')">≡ 一覧</button>
+      <button class="view-btn" id="btn-view-loc" onclick="switchView('location')">⊞ 拠点別</button>
+    </div>
     <button class="btn-icon" id="btn-settings">⚙ 設定</button>
     <button class="btn-logout" id="btn-logout">ログアウト</button>
   </header>
@@ -710,6 +734,9 @@ tr.row-warning td { background: #fffdf0; }
         <div class="dash-label">🟢 正常</div>
       </div>
     </div>
+
+    <!-- 拠点別ダッシュボード -->
+    <div id="loc-dashboard" class="loc-dashboard" style="display:none"></div>
 
     <!-- ツールバー -->
     <div class="toolbar">
@@ -1071,12 +1098,110 @@ function surplusLabel(stock, required, unit) {
   return `<span class="shortage">${diff} 不足</span>`;
 }
 
+// ─ ビュー切り替え ─────────────────────────────
+let currentView = 'list';
+
+const DISTRICT_COLORS = {
+  '鎌倉地域': '#22c55e',
+  '腰越地域': '#f97316',
+  '深沢地域': '#eab308',
+  '大船地域': '#3b82f6',
+  '玉縄地域': '#ec4899'
+};
+
+function getDistrict(locName) {
+  const m = locName.match(/（(.+地域)）/);
+  return m ? m[1] : 'その他';
+}
+
+function switchView(view) {
+  currentView = view;
+  document.getElementById('btn-view-list').classList.toggle('active', view === 'list');
+  document.getElementById('btn-view-loc').classList.toggle('active', view === 'location');
+  const isLoc = view === 'location';
+  document.querySelector('.dashboard').style.display    = isLoc ? 'none' : '';
+  document.querySelector('.toolbar').style.display      = isLoc ? 'none' : '';
+  document.querySelector('.table-wrap').style.display   = isLoc ? 'none' : '';
+  document.getElementById('bulk-bar').style.display     = 'none';
+  document.querySelector('.header-filter').style.display = isLoc ? 'none' : '';
+  document.getElementById('loc-dashboard').style.display = isLoc ? 'grid' : 'none';
+  if (isLoc) renderLocDashboard();
+}
+
+function renderLocDashboard() {
+  const container = document.getElementById('loc-dashboard');
+  const locations = data.locations || [];
+
+  container.innerHTML = locations.map(loc => {
+    const items = data.items.filter(it => it.location === loc);
+    let expired = 0, warning = 0, shortage = 0;
+    let foodTotal = 0, waterTotal = 0;
+
+    items.forEach(it => {
+      const s = getStatus(it.expiry);
+      if (s === 'expired') expired++;
+      else if (s === 'warning') warning++;
+      const stock = calcStock(it);
+      if (it.required > 0 && stock < it.required) shortage++;
+      // 食料（単位が「食」のもの）
+      if (it.unit === '食') foodTotal += stock;
+      // 水（単位が「本」でカテゴリが水 → 500ml換算）
+      if (it.category === '水' && it.unit === '本') waterTotal += stock * 0.5;
+    });
+
+    const district  = getDistrict(loc);
+    const color     = DISTRICT_COLORS[district] || '#64748b';
+    const alertBorder = expired > 0 ? 'var(--red)' : warning > 0 ? 'var(--yellow)' : color + '55';
+
+    // 拠点名から地域表記を除いた短縮名
+    const shortName = loc.replace(/（.+地域）/, '');
+
+    return `<div class="loc-card" style="border-color:${alertBorder};border-top:3px solid ${color}" onclick="selectLocation('${esc(loc)}')">
+      <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:4px;letter-spacing:.03em">${esc(district)}</div>
+      <div class="loc-name">${esc(shortName)}</div>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:11px;color:var(--muted)">🍱 食料</span>
+          <span style="font-size:15px;font-weight:800;color:var(--text)">${foodTotal.toLocaleString()}<span style="font-size:10px;font-weight:500;color:var(--muted);margin-left:1px">食</span></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:11px;color:var(--muted)">💧 水</span>
+          <span style="font-size:15px;font-weight:800;color:var(--text)">${waterTotal.toLocaleString()}<span style="font-size:10px;font-weight:500;color:var(--muted);margin-left:1px">L</span></span>
+        </div>
+      </div>
+      <div class="loc-stats">
+        <div class="loc-stat stat-expired">
+          <div class="loc-stat-num">${expired}</div>
+          <div class="loc-stat-label">期限切れ</div>
+        </div>
+        <div class="loc-stat stat-warning">
+          <div class="loc-stat-num">${warning}</div>
+          <div class="loc-stat-label">要注意</div>
+        </div>
+        <div class="loc-stat stat-shortage">
+          <div class="loc-stat-num">${shortage}</div>
+          <div class="loc-stat-label">不足</div>
+        </div>
+      </div>
+      <div class="loc-item-count" style="margin-top:6px;text-align:right">${items.length}品目</div>
+    </div>`;
+  }).join('');
+}
+
+function selectLocation(loc) {
+  switchView('list');
+  const sel = document.getElementById('location-filter');
+  sel.value = loc;
+  sel.dispatchEvent(new Event('change'));
+}
+
 // ─ レンダリング ───────────────────────────────
 function render() {
   updateLocationFilter();
   updateDashboard();
   updateTable();
   document.getElementById('item-count').textContent = `全 ${data.items.length} 件`;
+  if (currentView === 'location') renderLocDashboard();
 }
 
 function updateLocationFilter() {

@@ -25387,7 +25387,7 @@
       "unitQty": 1,
       "boxes": 1,
       "loose": 0,
-      "required": 1,
+      "required": 1200,
       "unit": "本",
       "expiry": "2026-08-28",
       "memo": ""

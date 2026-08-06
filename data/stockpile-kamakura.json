@@ -1,10 +1,5 @@
 {
-  "contacts": [
-    {
-      "name": "テスト",
-      "email": "miku0521.0601@gmail.com"
-    }
-  ],
+  "contacts": [],
   "alertDays": 90,
   "locations": [
     "第一小学校（鎌倉地域）",

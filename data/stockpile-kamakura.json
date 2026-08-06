@@ -34,11 +34,11 @@
       "name": "サバイバルフーズ",
       "category": "食料",
       "location": "第一小学校（鎌倉地域）",
-      "unit": "食",
       "unitQty": 60,
       "boxes": 158,
       "loose": 0,
       "required": 900,
+      "unit": "食",
       "expiry": "",
       "memo": "1箱60食分"
     },

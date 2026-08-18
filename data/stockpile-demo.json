@@ -14,7 +14,7 @@
       "unitQty": 6,
       "boxes": 10,
       "loose": 0,
-      "required": 60,
+      "required": 360,
       "unit": "本",
       "expiry": "2026-10-30",
       "memo": ""
@@ -23,7 +23,46 @@
   "calcSettings": {
     "population": 0,
     "staffRatio": 0.1,
-    "evacueeRatio": 0.3
+    "evacueeRatio": 0.3,
+    "rules": [
+      {
+        "key": "food",
+        "label": "食料",
+        "matchUnit": "食",
+        "matchCategory": "",
+        "perPersonPerDay": 3,
+        "hint": "1人1日3食"
+      },
+      {
+        "key": "water",
+        "label": "飲料水(500ml)",
+        "matchUnit": "本",
+        "matchCategory": "水",
+        "perPersonPerDay": 4,
+        "hint": "1人1日2L=4本"
+      },
+      {
+        "key": "toilet",
+        "label": "トイレ用品",
+        "matchUnit": "個",
+        "matchCategory": "トイレ",
+        "perPersonPerDay": 5,
+        "hint": "1人1日5回"
+      },
+      {
+        "key": "mask",
+        "label": "衛生用品",
+        "matchUnit": "枚",
+        "matchCategory": "衛生",
+        "perPersonPerDay": 2,
+        "hint": "マスク等1日2枚"
+      }
+    ],
+    "locationPopulations": {
+      "本社": 30,
+      "〇〇工場": 50
+    },
+    "stayDays": 3
   },
   "emergencyData": {
     "本社": {

@@ -19,6 +19,14 @@ module.exports = async (req, res) => {
       return res.status(401).json({ error: 'パスワードが違います' });
     }
 
+    if (company.expiresAt) {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const exp   = new Date(company.expiresAt);
+      if (today > exp) {
+        return res.status(403).json({ error: 'デモ期間が終了しました。お問い合わせは resilab-jpn.com まで。' });
+      }
+    }
+
     res.json({ token: company.tokenHash, companyName: company.name });
   } catch (err) {
     console.error('company-login エラー:', err.message);

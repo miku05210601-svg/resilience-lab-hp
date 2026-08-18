@@ -25,6 +25,7 @@
     "name": "サンプル市（デモ用）",
     "passwordHash": "7a0644204dd3d8a92aa101345a51807d49c93b99a3b49ea1d2e60a374bcb724a",
     "tokenHash": "1f87e00b44436505b3d554d5b10c926df7182f2a5534f590b50c953613e6bedf",
-    "created": "2026-08-18"
+    "created": "2026-08-18",
+    "expiresAt": "2026-09-18"
   }
 ]

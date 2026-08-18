@@ -19,5 +19,12 @@
     "passwordHash": "b49874e6e3122f2f7fac0461773e53541d786ce2059633b2374b46dfb07a8e4c",
     "tokenHash": "482e7443f33a0ac4c81f510c09d1576a4942134a0ba259a79bbc441d420f4931",
     "created": "2026-07-30"
+  },
+  {
+    "code": "demo",
+    "name": "サンプル市（デモ用）",
+    "passwordHash": "7a0644204dd3d8a92aa101345a51807d49c93b99a3b49ea1d2e60a374bcb724a",
+    "tokenHash": "1f87e00b44436505b3d554d5b10c926df7182f2a5534f590b50c953613e6bedf",
+    "created": "2026-08-18"
   }
 ]

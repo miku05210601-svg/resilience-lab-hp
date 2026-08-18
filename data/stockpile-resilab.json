@@ -1,24 +1,249 @@
 {
   "contacts": [
-    { "name": "総務部 防災担当", "email": "bousai-sample@example.com" }
+    {
+      "name": "総務部 防災担当",
+      "email": "bousai-sample@example.com"
+    }
   ],
-  "locations": ["本社", "大阪支店"],
-  "alertDays": 90,
+  "locations": [
+    "本社",
+    "大阪支店",
+    "関東支店"
+  ],
+  "alertDays": 91,
   "items": [
-    { "id": "1",  "name": "保存水2L",            "category": "水",       "location": "本社",   "unit": "本",   "unitQty": 6,  "boxes": 75, "loose": 0,  "required": 450, "expiry": "2029-06-01", "memo": "ローリングストック対象" },
-    { "id": "2",  "name": "保存水500mL",         "category": "水",       "location": "大阪支店", "unit": "本",   "unitQty": 24, "boxes": 10, "loose": 5,  "required": 300, "expiry": "2026-07-20", "memo": "" },
-    { "id": "3",  "name": "アルファ米(五目ご飯)",  "category": "食料",     "location": "本社",   "unit": "食",   "unitQty": 50, "boxes": 9,  "loose": 0,  "required": 450, "expiry": "2029-12-31", "memo": "アレルギー対応品含む" },
-    { "id": "4",  "name": "缶詰パン",             "category": "食料",     "location": "本社",   "unit": "缶",   "unitQty": 24, "boxes": 5,  "loose": 10, "required": 150, "expiry": "2026-08-15", "memo": "" },
-    { "id": "5",  "name": "栄養補助食品",          "category": "食料",     "location": "大阪支店", "unit": "箱",   "unitQty": 30, "boxes": 5,  "loose": 0,  "required": 150, "expiry": "2027-03-01", "memo": "" },
-    { "id": "6",  "name": "携帯トイレ(50回分)",    "category": "トイレ",   "location": "本社",   "unit": "箱",   "unitQty": 50, "boxes": 15, "loose": 0,  "required": 750, "expiry": "",           "memo": "期限なし" },
-    { "id": "7",  "name": "簡易トイレ用凝固剤",     "category": "トイレ",   "location": "大阪支店", "unit": "個",   "unitQty": 100,"boxes": 2,  "loose": 30, "required": 300, "expiry": "2028-01-01", "memo": "" },
-    { "id": "8",  "name": "ウェットティッシュ",     "category": "衛生",     "location": "本社",   "unit": "個",   "unitQty": 30, "boxes": 10, "loose": 0,  "required": 300, "expiry": "2026-06-30", "memo": "" },
-    { "id": "9",  "name": "使い捨てマスク(50枚入)", "category": "衛生",     "location": "本社",   "unit": "箱",   "unitQty": 1,  "boxes": 20, "loose": 0,  "required": 20,  "expiry": "2025-12-01", "memo": "要交換" },
-    { "id": "10", "name": "救急セット",            "category": "衛生",     "location": "大阪支店", "unit": "セット","unitQty": 1,  "boxes": 5,  "loose": 0,  "required": 5,   "expiry": "2027-05-01", "memo": "" },
-    { "id": "11", "name": "LEDランタン",           "category": "電源・照明","location": "本社",   "unit": "個",   "unitQty": 1,  "boxes": 25, "loose": 0,  "required": 25,  "expiry": "",           "memo": "単3電池別売" },
-    { "id": "12", "name": "乾電池(単3・20本入)",    "category": "電源・照明","location": "本社",   "unit": "パック","unitQty": 20, "boxes": 8,  "loose": 0,  "required": 160, "expiry": "2031-01-01", "memo": "" },
-    { "id": "13", "name": "モバイルバッテリー",      "category": "電源・照明","location": "大阪支店", "unit": "個",   "unitQty": 1,  "boxes": 10, "loose": 0,  "required": 15,  "expiry": "",           "memo": "不足気味、追加発注予定" },
-    { "id": "14", "name": "アルミブランケット",      "category": "その他",   "location": "本社",   "unit": "枚",   "unitQty": 50, "boxes": 1,  "loose": 0,  "required": 50,  "expiry": "",           "memo": "" },
-    { "id": "15", "name": "軍手・作業用手袋",        "category": "その他",   "location": "本社",   "unit": "組",   "unitQty": 12, "boxes": 5,  "loose": 0,  "required": 60,  "expiry": "",           "memo": "" }
-  ]
+    {
+      "id": "1",
+      "name": "保存水2L",
+      "category": "水",
+      "location": "本社",
+      "unit": "本",
+      "unitQty": 6,
+      "boxes": 75,
+      "loose": 0,
+      "required": 450,
+      "expiry": "2029-06-01",
+      "memo": "ローリングストック対象"
+    },
+    {
+      "id": "2",
+      "name": "保存水500mL",
+      "category": "水",
+      "location": "大阪支店",
+      "unit": "本",
+      "unitQty": 24,
+      "boxes": 10,
+      "loose": 5,
+      "required": 300,
+      "expiry": "2026-07-20",
+      "memo": ""
+    },
+    {
+      "id": "3",
+      "name": "アルファ米(五目ご飯)",
+      "category": "食料",
+      "location": "本社",
+      "unit": "食",
+      "unitQty": 50,
+      "boxes": 9,
+      "loose": 0,
+      "required": 450,
+      "expiry": "2029-12-31",
+      "memo": "アレルギー対応品含む"
+    },
+    {
+      "id": "4",
+      "name": "缶詰パン",
+      "category": "食料",
+      "location": "本社",
+      "unit": "缶",
+      "unitQty": 24,
+      "boxes": 5,
+      "loose": 10,
+      "required": 150,
+      "expiry": "2026-08-15",
+      "memo": ""
+    },
+    {
+      "id": "5",
+      "name": "栄養補助食品",
+      "category": "食料",
+      "location": "大阪支店",
+      "unit": "箱",
+      "unitQty": 30,
+      "boxes": 5,
+      "loose": 0,
+      "required": 150,
+      "expiry": "2027-03-01",
+      "memo": ""
+    },
+    {
+      "id": "6",
+      "name": "携帯トイレ(50回分)",
+      "category": "トイレ",
+      "location": "本社",
+      "unit": "箱",
+      "unitQty": 50,
+      "boxes": 15,
+      "loose": 0,
+      "required": 750,
+      "expiry": "",
+      "memo": "期限なし"
+    },
+    {
+      "id": "7",
+      "name": "簡易トイレ用凝固剤",
+      "category": "トイレ",
+      "location": "大阪支店",
+      "unit": "個",
+      "unitQty": 100,
+      "boxes": 2,
+      "loose": 30,
+      "required": 300,
+      "expiry": "2028-01-01",
+      "memo": ""
+    },
+    {
+      "id": "8",
+      "name": "ウェットティッシュ",
+      "category": "衛生",
+      "location": "本社",
+      "unitQty": 30,
+      "boxes": 10,
+      "loose": 0,
+      "required": 300,
+      "unit": "個",
+      "expiry": "2026-06-30",
+      "memo": ""
+    },
+    {
+      "id": "9",
+      "name": "使い捨てマスク(50枚入)",
+      "category": "衛生",
+      "location": "本社",
+      "unit": "箱",
+      "unitQty": 1,
+      "boxes": 20,
+      "loose": 0,
+      "required": 20,
+      "expiry": "2025-12-01",
+      "memo": "要交換"
+    },
+    {
+      "id": "10",
+      "name": "救急セット",
+      "category": "衛生",
+      "location": "大阪支店",
+      "unit": "セット",
+      "unitQty": 1,
+      "boxes": 5,
+      "loose": 0,
+      "required": 5,
+      "expiry": "2027-05-01",
+      "memo": ""
+    },
+    {
+      "id": "11",
+      "name": "LEDランタン",
+      "category": "電源・照明",
+      "location": "本社",
+      "unit": "個",
+      "unitQty": 1,
+      "boxes": 25,
+      "loose": 0,
+      "required": 25,
+      "expiry": "",
+      "memo": "単3電池別売"
+    },
+    {
+      "id": "12",
+      "name": "乾電池(単3・20本入)",
+      "category": "電源・照明",
+      "location": "本社",
+      "unit": "パック",
+      "unitQty": 20,
+      "boxes": 8,
+      "loose": 0,
+      "required": 160,
+      "expiry": "2031-01-01",
+      "memo": ""
+    },
+    {
+      "id": "13",
+      "name": "モバイルバッテリー",
+      "category": "電源・照明",
+      "location": "大阪支店",
+      "unit": "個",
+      "unitQty": 1,
+      "boxes": 10,
+      "loose": 0,
+      "required": 15,
+      "expiry": "",
+      "memo": "不足気味、追加発注予定"
+    },
+    {
+      "id": "14",
+      "name": "アルミブランケット",
+      "category": "その他",
+      "location": "本社",
+      "unit": "枚",
+      "unitQty": 50,
+      "boxes": 1,
+      "loose": 0,
+      "required": 50,
+      "expiry": "",
+      "memo": ""
+    },
+    {
+      "id": "15",
+      "name": "軍手・作業用手袋",
+      "category": "その他",
+      "location": "本社",
+      "unit": "組",
+      "unitQty": 12,
+      "boxes": 5,
+      "loose": 0,
+      "required": 60,
+      "expiry": "",
+      "memo": ""
+    }
+  ],
+  "calcSettings": {
+    "stayDays": 3,
+    "rules": [
+      {
+        "key": "food",
+        "label": "食料",
+        "matchUnit": "食",
+        "matchCategory": "",
+        "perPersonPerDay": 3,
+        "hint": "1人1日3食"
+      },
+      {
+        "key": "water",
+        "label": "飲料水(500ml)",
+        "matchUnit": "本",
+        "matchCategory": "水",
+        "perPersonPerDay": 4,
+        "hint": "1人1日2L=4本"
+      },
+      {
+        "key": "toilet",
+        "label": "トイレ用品",
+        "matchUnit": "個",
+        "matchCategory": "トイレ",
+        "perPersonPerDay": 5,
+        "hint": "1人1日5回"
+      },
+      {
+        "key": "mask",
+        "label": "衛生用品",
+        "matchUnit": "枚",
+        "matchCategory": "衛生",
+        "perPersonPerDay": 2,
+        "hint": "マスク等1日2枚"
+      }
+    ],
+    "locationPopulations": {}
+  }
 }

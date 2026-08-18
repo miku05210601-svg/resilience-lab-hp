@@ -5,11 +5,36 @@
     "本社",
     "〇〇工場"
   ],
-  "items": [],
+  "items": [
+    {
+      "id": "751f25fa-9b30-43f0-b008-4733d5ca11ce",
+      "name": "ミネラルウォーター２L",
+      "category": "水",
+      "location": "本社",
+      "unitQty": 6,
+      "boxes": 10,
+      "loose": 0,
+      "required": 0,
+      "unit": "本",
+      "expiry": "2026-10-30",
+      "memo": ""
+    }
+  ],
   "calcSettings": {
     "population": 0,
     "staffRatio": 0.1,
     "evacueeRatio": 0.3
   },
-  "emergencyData": {}
+  "emergencyData": {
+    "本社": {
+      "status": "unopened",
+      "currentEvacuees": 0,
+      "capacity": 0
+    },
+    "〇〇工場": {
+      "status": "unopened",
+      "currentEvacuees": 0,
+      "capacity": 0
+    }
+  }
 }

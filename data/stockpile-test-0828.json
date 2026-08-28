@@ -5,7 +5,86 @@
     "本社",
     "〇〇工場"
   ],
-  "items": [],
+  "items": [
+    {
+      "id": "item-t-001",
+      "name": "ミネラルウォーター 2L",
+      "category": "水",
+      "location": "本社",
+      "unitQty": 6,
+      "boxes": 5,
+      "loose": 0,
+      "required": 120,
+      "unit": "本",
+      "expiry": "2027-03-31",
+      "memo": ""
+    },
+    {
+      "id": "item-t-002",
+      "name": "ミネラルウォーター 2L",
+      "category": "水",
+      "location": "〇〇工場",
+      "unitQty": 6,
+      "boxes": 8,
+      "loose": 0,
+      "required": 200,
+      "unit": "本",
+      "expiry": "2027-03-31",
+      "memo": ""
+    },
+    {
+      "id": "item-t-003",
+      "name": "アルファ米（白米）",
+      "category": "食料",
+      "location": "本社",
+      "unitQty": 50,
+      "boxes": 2,
+      "loose": 10,
+      "required": 300,
+      "unit": "食",
+      "expiry": "2031-06-30",
+      "memo": ""
+    },
+    {
+      "id": "item-t-004",
+      "name": "非常用クラッカー",
+      "category": "食料",
+      "location": "〇〇工場",
+      "unitQty": 24,
+      "boxes": 3,
+      "loose": 0,
+      "required": 200,
+      "unit": "食",
+      "expiry": "2028-12-31",
+      "memo": ""
+    },
+    {
+      "id": "item-t-005",
+      "name": "携帯トイレ",
+      "category": "トイレ",
+      "location": "本社",
+      "unitQty": 30,
+      "boxes": 2,
+      "loose": 5,
+      "required": 150,
+      "unit": "個",
+      "expiry": "2030-12-31",
+      "memo": ""
+    },
+    {
+      "id": "item-t-006",
+      "name": "サージカルマスク",
+      "category": "衛生",
+      "location": "〇〇工場",
+      "unitQty": 50,
+      "boxes": 4,
+      "loose": 0,
+      "required": 400,
+      "unit": "枚",
+      "expiry": "2028-06-30",
+      "memo": ""
+    }
+  ],
   "calcSettings": {
     "population": 0,
     "staffRatio": 0.1,

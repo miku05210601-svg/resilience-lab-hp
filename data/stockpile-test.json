@@ -1,0 +1,15 @@
+{
+  "contacts": [],
+  "alertDays": 90,
+  "locations": [
+    "本社",
+    "〇〇工場"
+  ],
+  "items": [],
+  "calcSettings": {
+    "population": 0,
+    "staffRatio": 0.1,
+    "evacueeRatio": 0.3
+  },
+  "emergencyData": {}
+}

@@ -21,6 +21,14 @@
     "created": "2026-07-30"
   },
   {
+    "code": "test",
+    "name": "テストページ",
+    "passwordHash": "b9bde88b742c380eab8a132f6dcfb98ce72faad7d24bc243474ace5cc8a22d60",
+    "tokenHash": "7f9232f5b40b2ae8f65071bab0863bfbcc271951048c25ece987ede8054d2746",
+    "created": "2026-08-28",
+    "expiresAt": "2026-09-18"
+  },
+  {
     "code": "demo",
     "name": "サンプル市（デモ用）",
     "passwordHash": "7a0644204dd3d8a92aa101345a51807d49c93b99a3b49ea1d2e60a374bcb724a",

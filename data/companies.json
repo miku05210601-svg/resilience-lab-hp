@@ -21,10 +21,10 @@
     "created": "2026-07-30"
   },
   {
-    "code": "test",
+    "code": "test-0828",
     "name": "テストページ",
-    "passwordHash": "679c0c92cfb3833832358db81fe7624e598618c0e0896f7e2a61609c059aeb9c",
-    "tokenHash": "ee2c72660b3174cd7b910f2a23b290887ec133d7678808b5bf8c57600b9dd703",
+    "passwordHash": "a473dfaa61a295d70403b72cf266264bc21c8937977b68e9a91c57efce3a9309",
+    "tokenHash": "04ee22f454d108c0e4eb079cb6c9b64d1faa0e00bc804fd671abaca6bd590a3d",
     "created": "2026-08-28",
     "expiresAt": "2026-09-18"
   },

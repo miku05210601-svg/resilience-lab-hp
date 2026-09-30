@@ -15,6 +15,14 @@ async function saveToSheet(data) {
   }
 }
 
+// 無料解説（30分）の予約リンク。予約ページのURLは環境変数 BOOKING_URL に設定する
+function bookingHref(company) {
+  if (process.env.BOOKING_URL) return process.env.BOOKING_URL;
+  const subject = `BCP診断結果の無料解説（30分）の予約（${company}様）`;
+  const body = '診断結果の無料解説（30分・オンライン）を希望します。\n\nご都合のよい日時（候補があれば）：\n';
+  return `mailto:info@resilab-jpn.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
 const CATEGORIES = [
   '経営・体制',
   'リスク認識',
@@ -374,17 +382,19 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, 
           ${servicesHtml}
         </div>
 
-        <!-- アポイントCTA -->
+        <!-- アポイントCTA：予約ページで日時を選ぶだけにする（未設定の間はメールで受付） -->
         <div style="background:#1a1a2e; border-radius:10px; padding:28px; text-align:center; margin-bottom:28px;">
-          <p style="color:white; font-size:18px; font-weight:bold; margin:0 0 16px;">まずは無料でご相談ください</p>
+          <p style="color:#ff8fa6; font-size:12px; font-weight:bold; letter-spacing:.08em; margin:0 0 6px;">無料・30分・オンライン</p>
+          <p style="color:white; font-size:18px; font-weight:bold; margin:0 0 16px;">このレポートを、専門家が30分で解説します</p>
           <p style="color:#ccc; font-size:14px; margin:0 0 20px; line-height:1.9; text-align:left;">
-            診断結果をもとに、貴社に最適なBCP・課題への対応をご提案いたします。<br>
-            オンライン・ご訪問どちらでも対応可能です。<br>
-            <span style="font-size:12px; color:#999;">（ご訪問は東京・神奈川・千葉・埼玉に限ります。ご了承ください。）</span><br><br>
-            まずは他社の状況や改善アイディアなど、ざっくばらんな情報共有を前提に、お気軽にご連絡ください。
+            ・スコアの読み方と、いちばん弱い領域の理由<br>
+            ・損失シミュレーションの前提と、減らすための打ち手<br>
+            ・優先アクションTOP3を、貴社の体制で進める段取り<br><br>
+            売り込みはいたしません。社内・経営層へのご説明の材料づくりにもお使いください。<br>
+            <span style="font-size:12px; color:#999;">（ご訪問をご希望の場合は東京・神奈川・千葉・埼玉に限ります。）</span>
           </p>
-          <a href="mailto:info@resilab-jpn.com?subject=${encodeURIComponent('BCP診断後のご相談（' + company + '様）')}&body=${encodeURIComponent('BCP診断を実施しました。詳細について、説明してください。\n\n■希望日時（複数ご提示ください）\n\n\n■希望形式：オンライン／対面\n（対面の場合は場所をお知らせください）')}" style="display:inline-block; background:#C8002D; color:white; padding:14px 36px; border-radius:8px; font-weight:bold; font-size:15px; text-decoration:none; margin-bottom:12px;">無料相談を申し込む →</a>
-          <p style="color:#666; font-size:12px; margin:0;">平日9:00〜17:00 ／ info@resilab-jpn.com</p>
+          <a href="${bookingHref(company)}" style="display:inline-block; background:#C8002D; color:white; padding:14px 36px; border-radius:8px; font-weight:bold; font-size:15px; text-decoration:none; margin-bottom:12px;">📅 空いている日時を選んで予約する →</a>
+          <p style="color:#666; font-size:12px; margin:0;">ご不明点は info@resilab-jpn.com まで</p>
         </div>
 
         <!-- 免責・コンプライアンス注記 -->
@@ -406,7 +416,7 @@ function buildCustomerHtml({ company, name, totalScore, level, catPcts, report, 
 }
 
 // レジリエンスラボ社内向け通知メール
-function buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }) {
+function buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, referrer, ref, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }) {
   const submitted = submittedAt
     ? new Date(submittedAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
     : '不明';
@@ -432,6 +442,10 @@ function buildNotifyText({ company, dept, name, email, tel, size, industry, annu
   年商目安: ${annualRevenue || '未入力'}
 ${revText}
 
+■ 紹介者・経路
+  紹介者・きっかけ: ${referrer || '—'}
+  経路（URLのref）: ${ref || '—'}
+
 ■ 診断結果
   総合スコア: ${totalScore ?? '—'} 点 / 100点
   総合レベル: ${level ?? '—'}
@@ -441,7 +455,8 @@ ${domainRows}
 ${lossRows}
 
 ──────────────────────
-※ 顧客へのAIレポートは自動送信済みです。
+※ 顧客へのAIレポートは自動送信済みです（無料解説の予約リンク付き）。
+※ 予約が入っていなければ、翌営業日までに「結果の解説（30分）」を具体的な候補日時つきでご案内してください。
 `.trim();
 }
 
@@ -451,6 +466,8 @@ module.exports = async (req, res) => {
   }
 
   const { company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt } = req.body;
+  const referrer = String(req.body.referrer || '').slice(0, 100);
+  const ref = String(req.body.ref || '').slice(0, 50);
 
   if (!company || !name || !email) {
     return res.status(400).json({ error: '必須項目が不足しています' });
@@ -491,8 +508,8 @@ module.exports = async (req, res) => {
     await resend.emails.send({
       from: 'BCP診断ツール <report-noreply@resilab-jpn.com>',
       to: process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com',
-      subject: `【新規リード】${company} 様 — スコア${totalScore}点（${level}）`,
-      text: buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }),
+      subject: `【新規リード】${company} 様 — スコア${totalScore}点（${level}）${(referrer || ref) ? `／紹介：${referrer || ref}` : ''}`,
+      text: buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, referrer, ref, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }),
     });
   } catch (err) {
     console.error('通知メール送信エラー:', err);
@@ -500,7 +517,7 @@ module.exports = async (req, res) => {
   }
 
   // Googleスプレッドシートにデータを記録
-  await saveToSheet({ company, dept, name, email, tel, size, industry, annualRevenue, totalScore, level, catPcts, submittedAt });
+  await saveToSheet({ company, dept, name, email, tel, size, industry, annualRevenue, referrer, ref, totalScore, level, catPcts, submittedAt });
 
   // メール失敗時もデータをログに残す
   if (errors.length > 0) {

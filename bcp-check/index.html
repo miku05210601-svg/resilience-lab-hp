@@ -565,6 +565,32 @@
     .thankyou-box ul { padding-left: 20px; }
     .thankyou-box li { margin-bottom: 6px; }
 
+    /* 無料解説の予約 */
+    .booking-box {
+      background: #1a1a2e;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      color: white;
+    }
+    .booking-eyebrow { font-size: 12px; font-weight: 700; color: #ff8fa6; letter-spacing: .08em; margin-bottom: 6px; }
+    .booking-title { font-size: 18px; font-weight: 900; line-height: 1.5; margin-bottom: 12px; }
+    .booking-list { padding-left: 20px; margin-bottom: 18px; font-size: 14px; color: #ddd; line-height: 1.7; }
+    .booking-list li { margin-bottom: 4px; }
+    .booking-btn {
+      display: block;
+      background: var(--red);
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 15px;
+      padding: 14px 16px;
+      border-radius: 8px;
+    }
+    .booking-btn:hover { opacity: .9; }
+    .booking-note { font-size: 12px; color: #aaa; margin-top: 10px; text-align: center; }
+
     /* ローディング */
     .loading {
       text-align: center;
@@ -778,7 +804,7 @@
   <section id="section-contact" class="section">
     <div class="card">
       <h2 class="form-title">診断レポートの送付先</h2>
-      <p class="form-desc">以下をご入力ください。営業日3日以内に詳細レポートをお送りします。</p>
+      <p class="form-desc">以下をご入力ください。数分以内に詳細レポートをメールでお送りします。</p>
 
       <form id="contact-form" onsubmit="submitForm(event)">
         <div class="form-group">
@@ -843,6 +869,10 @@
             <option value="100億円以上">100億円以上</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label">ご紹介者・きっかけ <span style="font-size:11px; color:var(--muted); font-weight:normal;">（任意）</span></label>
+          <input type="text" class="form-input" id="field-referrer" placeholder="例：〇〇様からのご紹介、セミナー、展示会 など">
+        </div>
 
         <button type="submit" class="btn btn-primary" id="btn-submit">
           送信して結果レポートを受け取る →
@@ -874,6 +904,20 @@
           <li>課題領域の改善提案</li>
         </ul>
       </div>
+      <!-- 無料解説の予約CTA（診断直後の関心が高いうちに案内する） -->
+      <div class="booking-box">
+        <p class="booking-eyebrow">無料・30分・オンライン</p>
+        <p class="booking-title">診断結果を、専門家が30分で解説します</p>
+        <ul class="booking-list">
+          <li>御社のスコアの読み方と、いちばん弱い領域の理由</li>
+          <li>損失シミュレーションの前提と、減らすための打ち手</li>
+          <li>優先アクションTOP3を、御社の体制で進める段取り</li>
+        </ul>
+        <a id="booking-link" href="#" class="booking-btn" target="_blank" rel="noopener">
+          📅 空いている日時を選んで予約する →
+        </a>
+        <p class="booking-note">売り込みはしません。社内説明の材料づくりにもお使いください。</p>
+      </div>
       <a href="https://resilab-jpn.com/" class="btn btn-secondary" style="width:100%; text-align:center;" target="_blank">
         レジリエンスラボのホームページへ
       </a>
@@ -883,6 +927,25 @@
 </main>
 
 <script>
+// ===== 無料解説の予約ページ（Googleカレンダーの予約スケジュール等のURLを入れる） =====
+const BOOKING_URL = '';
+// 流入経路：URL末尾の ?ref=xxx（パートナー・講演・展示会ごとに分ける）
+const REF = (new URLSearchParams(location.search).get('ref') || '').slice(0, 50);
+
+// 予約ボタンのリンク先（予約ページが未設定の間はメールで受け付ける）
+function setupBookingLink(company) {
+  const a = document.getElementById('booking-link');
+  if (!a) return;
+  if (BOOKING_URL) {
+    a.href = BOOKING_URL;
+  } else {
+    const subject = 'BCP診断結果の無料解説（30分）の予約' + (company ? '（' + company + '様）' : '');
+    const body = '診断結果の無料解説（30分・オンライン）を希望します。\n\nご都合のよい日時（候補があれば）：\n';
+    a.href = 'mailto:info@resilab-jpn.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    a.removeAttribute('target');
+  }
+}
+
 // ===== 診断データ =====
 const CATEGORIES = [
   { name: '経営・体制',        short: '①経営・体制',  max: 9 },
@@ -1339,6 +1402,7 @@ async function submitForm(e) {
   if (!valid) return;
 
   // バリデーション通過 → 即座にサンキューページを表示（待たせない）
+  setupBookingLink(company);
   showSection('section-thankyou');
 
   // バックグラウンドでメール・記録を処理（ノンブロッキング）
@@ -1352,6 +1416,8 @@ async function submitForm(e) {
     size:     document.getElementById('field-size').value,
     industry: document.getElementById('field-industry').value,
     annualRevenue: document.getElementById('field-revenue').value,
+    referrer: document.getElementById('field-referrer').value.trim(),
+    ref: REF,
     totalScore: result.totalScore,
     level: result.level,
     catScores: result.catScores,

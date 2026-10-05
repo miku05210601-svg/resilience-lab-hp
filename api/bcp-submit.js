@@ -512,7 +512,8 @@ module.exports = async (req, res) => {
   try {
     await resend.emails.send({
       from: 'BCP診断ツール <report-noreply@resilab-jpn.com>',
-      to: process.env.NOTIFY_EMAIL || 'info@resilab-jpn.com',
+      // 新規リードの通知先。気づくのが遅れるとフォローの機を逃すため、担当者個人のアドレスに送る
+      to: process.env.NOTIFY_EMAIL || 'mitou@resilab-jpn.com',
       subject: `【新規リード】${company} 様 — スコア${totalScore}点（${level}）${(referrer || ref) ? `／紹介：${referrer || ref}` : ''}`,
       text: buildNotifyText({ company, dept, name, email, tel, size, industry, annualRevenue, referrer, ref, totalScore, level, catPcts, submittedAt, lossScenarios, revenueInfo }),
     });

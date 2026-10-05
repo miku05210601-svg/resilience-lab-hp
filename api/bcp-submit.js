@@ -15,9 +15,14 @@ async function saveToSheet(data) {
   }
 }
 
-// 無料解説（30分）の予約リンク。予約ページのURLは環境変数 BOOKING_URL に設定する
+// 無料解説（30分）の予約ページ（Googleカレンダーの予約スケジュール）
+// 変更したいときは、環境変数 BOOKING_URL を設定すればデプロイなしで差し替えられる
+const DEFAULT_BOOKING_URL = 'https://calendar.app.google/WnqorHYcar74FTy4A';
+
+// 無料解説（30分）の予約リンク
 function bookingHref(company) {
   if (process.env.BOOKING_URL) return process.env.BOOKING_URL;
+  if (DEFAULT_BOOKING_URL) return DEFAULT_BOOKING_URL;
   const subject = `BCP診断結果の無料解説（30分）の予約（${company}様）`;
   const body = '診断結果の無料解説（30分・オンライン）を希望します。\n\nご都合のよい日時（候補があれば）：\n';
   return `mailto:info@resilab-jpn.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
